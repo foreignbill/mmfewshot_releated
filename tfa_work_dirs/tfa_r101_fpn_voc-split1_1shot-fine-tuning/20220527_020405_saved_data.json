@@ -1,0 +1,345 @@
+[
+    {
+        "CLASSES": [
+            "aeroplane",
+            "bicycle",
+            "boat",
+            "bottle",
+            "car",
+            "cat",
+            "chair",
+            "diningtable",
+            "dog",
+            "horse",
+            "person",
+            "pottedplant",
+            "sheep",
+            "train",
+            "tvmonitor",
+            "bird",
+            "bus",
+            "cow",
+            "motorbike",
+            "sofa"
+        ],
+        "img_prefix": "data/VOCdevkit/"
+    },
+    {
+        "id": "005620",
+        "filename": "VOC2007/JPEGImages/005620.jpg",
+        "width": 500,
+        "height": 332,
+        "ann": {
+            "bboxes": [
+                [
+                    3.0,
+                    65.0,
+                    496.0,
+                    236.0
+                ]
+            ],
+            "labels": [
+                0
+            ]
+        }
+    },
+    {
+        "id": "005073",
+        "filename": "VOC2007/JPEGImages/005073.jpg",
+        "width": 500,
+        "height": 375,
+        "ann": {
+            "bboxes": [
+                [
+                    409.0,
+                    84.0,
+                    500.0,
+                    151.0
+                ]
+            ],
+            "labels": [
+                2
+            ]
+        }
+    },
+    {
+        "id": "002350",
+        "filename": "VOC2007/JPEGImages/002350.jpg",
+        "width": 375,
+        "height": 500,
+        "ann": {
+            "bboxes": [
+                [
+                    85.0,
+                    2.0,
+                    294.0,
+                    500.0
+                ]
+            ],
+            "labels": [
+                3
+            ]
+        }
+    },
+    {
+        "id": "008388",
+        "filename": "VOC2007/JPEGImages/008388.jpg",
+        "width": 450,
+        "height": 338,
+        "ann": {
+            "bboxes": [
+                [
+                    0.0,
+                    0.0,
+                    450.0,
+                    337.0
+                ]
+            ],
+            "labels": [
+                4
+            ]
+        }
+    },
+    {
+        "id": "004129",
+        "filename": "VOC2007/JPEGImages/004129.jpg",
+        "width": 500,
+        "height": 375,
+        "ann": {
+            "bboxes": [
+                [
+                    1.0,
+                    33.0,
+                    460.0,
+                    319.0
+                ]
+            ],
+            "labels": [
+                5
+            ]
+        }
+    },
+    {
+        "id": "008063",
+        "filename": "VOC2007/JPEGImages/008063.jpg",
+        "width": 500,
+        "height": 375,
+        "ann": {
+            "bboxes": [
+                [
+                    52.0,
+                    104.0,
+                    157.0,
+                    301.0
+                ]
+            ],
+            "labels": [
+                6
+            ]
+        }
+    },
+    {
+        "id": "004785",
+        "filename": "VOC2007/JPEGImages/004785.jpg",
+        "width": 500,
+        "height": 331,
+        "ann": {
+            "bboxes": [
+                [
+                    55.0,
+                    96.0,
+                    475.0,
+                    331.0
+                ]
+            ],
+            "labels": [
+                7
+            ]
+        }
+    },
+    {
+        "id": "008822",
+        "filename": "VOC2007/JPEGImages/008822.jpg",
+        "width": 500,
+        "height": 333,
+        "ann": {
+            "bboxes": [
+                [
+                    0.0,
+                    11.0,
+                    393.0,
+                    333.0
+                ]
+            ],
+            "labels": [
+                8
+            ]
+        }
+    },
+    {
+        "id": "004553",
+        "filename": "VOC2007/JPEGImages/004553.jpg",
+        "width": 500,
+        "height": 334,
+        "ann": {
+            "bboxes": [
+                [
+                    139.0,
+                    104.0,
+                    498.0,
+                    334.0
+                ],
+                [
+                    241.0,
+                    34.0,
+                    368.0,
+                    251.0
+                ]
+            ],
+            "labels": [
+                9,
+                10
+            ]
+        }
+    },
+    {
+        "id": "000307",
+        "filename": "VOC2007/JPEGImages/000307.jpg",
+        "width": 500,
+        "height": 375,
+        "ann": {
+            "bboxes": [
+                [
+                    1.0,
+                    2.0,
+                    500.0,
+                    375.0
+                ]
+            ],
+            "labels": [
+                11
+            ]
+        }
+    },
+    {
+        "id": "000225",
+        "filename": "VOC2007/JPEGImages/000225.jpg",
+        "width": 500,
+        "height": 333,
+        "ann": {
+            "bboxes": [
+                [
+                    1.0,
+                    21.0,
+                    47.0,
+                    81.0
+                ]
+            ],
+            "labels": [
+                12
+            ]
+        }
+    },
+    {
+        "id": "001172",
+        "filename": "VOC2007/JPEGImages/001172.jpg",
+        "width": 500,
+        "height": 187,
+        "ann": {
+            "bboxes": [
+                [
+                    18.0,
+                    19.0,
+                    486.0,
+                    162.0
+                ]
+            ],
+            "labels": [
+                13
+            ]
+        }
+    },
+    {
+        "id": "001543",
+        "filename": "VOC2007/JPEGImages/001543.jpg",
+        "width": 500,
+        "height": 375,
+        "ann": {
+            "bboxes": [
+                [
+                    0.0,
+                    155.0,
+                    117.0,
+                    253.0
+                ],
+                [
+                    291.0,
+                    171.0,
+                    500.0,
+                    350.0
+                ]
+            ],
+            "labels": [
+                14,
+                19
+            ]
+        }
+    },
+    {
+        "id": "003614",
+        "filename": "VOC2007/JPEGImages/003614.jpg",
+        "width": 500,
+        "height": 375,
+        "ann": {
+            "bboxes": [
+                [
+                    81.0,
+                    112.0,
+                    272.0,
+                    250.0
+                ]
+            ],
+            "labels": [
+                15
+            ]
+        }
+    },
+    {
+        "id": "008883",
+        "filename": "VOC2007/JPEGImages/008883.jpg",
+        "width": 500,
+        "height": 375,
+        "ann": {
+            "bboxes": [
+                [
+                    332.0,
+                    224.0,
+                    408.0,
+                    284.0
+                ]
+            ],
+            "labels": [
+                16
+            ]
+        }
+    },
+    {
+        "id": "001713",
+        "filename": "VOC2007/JPEGImages/001713.jpg",
+        "width": 500,
+        "height": 435,
+        "ann": {
+            "bboxes": [
+                [
+                    34.0,
+                    63.0,
+                    479.0,
+                    356.0
+                ]
+            ],
+            "labels": [
+                17
+            ]
+        }
+    }
+]

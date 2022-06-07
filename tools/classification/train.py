@@ -29,6 +29,7 @@ os.environ['MKL_NUM_THREADS'] = '1'
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a model')
     parser.add_argument('config', help='train config file path')
+    parser.add_argument('predefined_path', help='train predefined file path')
     parser.add_argument('--work-dir', help='the dir to save logs and models')
     parser.add_argument(
         '--resume-from', help='the checkpoint file to resume from')
@@ -70,8 +71,9 @@ def parse_args():
     parser.add_argument('--local_rank', type=int, default=0)
     
     ################################################################################################################
-    parser.add_argument('--num_ways', type=int, default=5)
-    parser.add_argument('--num_shots', type=int, default=1)
+    parser.add_argument('--num_ways', type=int, default=5, help='number of categories in support set')
+    parser.add_argument('--num_shots', type=int, default=1, help='number of samples in each category')
+    parser.add_argument('--backbone', type=str, default='conv4', help='which backbone to be used, choose between conv4 and resnet12')
     ################################################################################################################
     args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
@@ -84,6 +86,7 @@ def main():
     args = parse_args()
 
     cfg = Config.fromfile(args.config)
+    print(f'cfg:{cfg}')
     if args.options is not None:
         cfg.merge_from_dict(args.options)
     # set cudnn_benchmark

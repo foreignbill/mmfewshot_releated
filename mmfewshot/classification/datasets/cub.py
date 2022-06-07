@@ -232,6 +232,16 @@ class CUBDataset(BaseFewShotDataset):
 
     resource = 'http://www.vision.caltech.edu/visipedia/CUB-200-2011.html'
     ALL_CLASSES = ALL_CLASSES
+    TRAIN_CLASSES = []
+    TEST_CLASSES = []
+    VAL_CLASSES = []
+    for i in range(len(ALL_CLASSES)):
+        if i % 2 == 0:
+            TRAIN_CLASSES += [ALL_CLASSES[i]]
+        elif i % 4 == 1:
+            VAL_CLASSES += [ALL_CLASSES[i]]
+        elif i % 4 == 3:
+            TEST_CLASSES += [ALL_CLASSES[i]]
 
     def __init__(self,
                  classes_id_seed: int = None,
@@ -281,17 +291,11 @@ class CUBDataset(BaseFewShotDataset):
             class_names = []
             for subset_ in self.subset:
                 if subset_ == 'train':
-                    class_names += [
-                        self.ALL_CLASSES[i] for i in classes_ids if i % 2 == 0
-                    ]
+                    class_names += self.TRAIN_CLASSES
                 elif subset_ == 'val':
-                    class_names += [
-                        self.ALL_CLASSES[i] for i in classes_ids if i % 4 == 1
-                    ]
+                    class_names += self.VAL_CLASSES
                 elif subset_ == 'test':
-                    class_names += [
-                        self.ALL_CLASSES[i] for i in classes_ids if i % 4 == 3
-                    ]
+                    class_names += self.TEST_CLASSES
                 else:
                     raise ValueError(f'invalid subset {subset_} only support '
                                      f'train, val or test.')

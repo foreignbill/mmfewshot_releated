@@ -91,7 +91,7 @@ def single_gpu_meta_test(model: Union[MMDataParallel, nn.Module],
 
     results_list = []
     # TODO: too much information
-    # prog_bar = mmcv.ProgressBar(num_test_tasks)
+    prog_bar = mmcv.ProgressBar(num_test_tasks)
     for task_id in range(num_test_tasks):
         # set support and query dataloader to the same task by task id
         query_dataloader.dataset.set_task_id(task_id)
@@ -104,7 +104,7 @@ def single_gpu_meta_test(model: Union[MMDataParallel, nn.Module],
             results, gt_labels, logger=logger, **eval_kwargs)
         eval_result['task_id'] = task_id
         results_list.append(eval_result)
-        # prog_bar.update()
+        prog_bar.update()
 
     if show_task_results:
         # the result of each task will be logged into logger
@@ -201,8 +201,8 @@ def multi_gpu_meta_test(model: MMDistributedDataParallel,
     sub_num_test_tasks = num_test_tasks // world_size
     sub_num_test_tasks += 1 if num_test_tasks % world_size != 0 else 0
     # TODO: too much information
-    # if rank == 0:
-        # prog_bar = mmcv.ProgressBar(num_test_tasks)
+    if rank == 0:
+        prog_bar = mmcv.ProgressBar(num_test_tasks)
     for i in range(sub_num_test_tasks):
         task_id = (i * world_size + rank)
         if task_id >= num_test_tasks:
@@ -218,8 +218,8 @@ def multi_gpu_meta_test(model: MMDistributedDataParallel,
             results, gt_labels, logger=logger, **eval_kwargs)
         eval_result['task_id'] = task_id
         results_list.append(eval_result)
-        # if rank == 0:
-            # prog_bar.update(world_size)
+        if rank == 0:
+            prog_bar.update(world_size)
 
     collect_results_list = collect_results_cpu(
         results_list, num_test_tasks, tmpdir=None)
@@ -272,8 +272,8 @@ def extract_features_for_fast_test(model: MetaTestParallel,
     feats_list, img_metas_list = [], []
     rank, _ = get_dist_info()
     # TODO: too much information
-    # if rank == 0:
-        # prog_bar = mmcv.ProgressBar(len(test_set_dataloader.dataset))
+    if rank == 0:
+        prog_bar = mmcv.ProgressBar(len(test_set_dataloader.dataset))
     model.eval()
     # traverse the whole dataset and compute the features from backbone
     with torch.no_grad():
@@ -282,8 +282,8 @@ def extract_features_for_fast_test(model: MetaTestParallel,
             # forward in `extract_feat` mode
             feats = model(img=data['img'], mode='extract_feat')
             feats_list.append(feats)
-            # if rank == 0:
-                # prog_bar.update(num_tasks=len(data['img_metas'].data[0]))
+            if rank == 0:
+                prog_bar.update(num_tasks=len(data['img_metas'].data[0]))
         feats = torch.cat(feats_list, dim=0)
     # cache the pre-computed features into dataset
     query_dataloader.dataset.cache_feats(feats, img_metas_list)

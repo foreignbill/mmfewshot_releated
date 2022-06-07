@@ -1,3 +1,5 @@
 # workdirectory
 work_dir
 work_dir/*
+.vscode
+.vscode/*

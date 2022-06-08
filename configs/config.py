@@ -1,4 +1,4 @@
-_base_ = ['./predefined.py']
+_base_ = ['./predefined_generate.py']
 
 #### image config
 img_size = 84
@@ -111,7 +111,7 @@ lr_config = dict(
 model = dict(
     type='Baseline',
     backbone=dict(type='Conv4'),
-    head=dict(type='LinearHead', num_classes=100, in_channels=1600),
+    head=dict(type='LinearHead', num_classes={{_base_.dataset_num_classes}}, in_channels=1600),
     meta_test_head=dict(type='LinearHead', num_classes=5, in_channels=1600))
 
 # work config

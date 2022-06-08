@@ -1,0 +1,15 @@
+num_ways = 5
+num_shots = 1
+num_queries = 15
+num_val_episodes = 100
+num_test_episodes = 2000
+dataset_type = 'TieredImageNetDataset'
+data_prefix = '/home/ghk/workerspace/datasets/classification/tiered-imagenet/'
+dataset_num_classes = 351
+test_type = 'MetaTestDataset'
+episodes_seed = 0
+model_name = 'Baseline'
+backbone = 'ResNet12'
+query_batch_size = 75
+max_epoch = 200
+gpu_resources = 2048

@@ -31,7 +31,6 @@ os.environ['MKL_NUM_THREADS'] = '1'
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a model')
     parser.add_argument('config', help='train config file path')
-    parser.add_argument('predefined_path', help='train predefined file path')
     parser.add_argument('--work-dir', help='the dir to save logs and models')
     parser.add_argument(
         '--resume-from', help='the checkpoint file to resume from')
@@ -73,9 +72,20 @@ def parse_args():
     parser.add_argument('--local_rank', type=int, default=0)
     
     ################################################################################################################
+    #### number of few-shot learning config
     parser.add_argument('--num_ways', type=int, default=5, help='number of categories in support set')
     parser.add_argument('--num_shots', type=int, default=1, help='number of samples in each category')
-    parser.add_argument('--backbone', type=str, default='conv4', help='which backbone to be used, choose between conv4 and resnet12')
+    parser.add_argument('--num_queries', type=int, default=15, help='number of queries')
+    parser.add_argument('--num_val_episodes', type=int, default=100, help='number of val episodes')
+    parser.add_argument('--num_test_episodes', type=int, default=2000, help='number of test episodes')
+    #### dataset config
+    parser.add_argument('--dataset_prefix', type=str, default='/dataset', help='prefix of dataset')
+    #### meta test config
+    parser.add_argument('--episodes_seed', type=int, default=0, help='seed for generating meta test episodes')
+    #### model
+    parser.add_argument('--backbone', type=str, default='Conv4', help='which backbone to be used, choose between Conv4 and ResNet12')
+    #### runner
+    parser.add_argument('--max_epoch', type=int, default=200, help='max epoch of runner')
     ################################################################################################################
     args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
@@ -87,6 +97,40 @@ def parse_args():
 def main():
     args = parse_args()
 
+    ################################################################################################################
+    #### predefined path
+    predefined_path = args.config.replace('config.py', 'predefined.py')
+    predefined_cfg = Config.fromfile(predefined_path)
+    #### number of few-shot learning config
+    predefined_cfg.num_ways = args.num_ways
+    predefined_cfg.num_shots = args.num_shots
+    predefined_cfg.num_queries = args.num_queries
+    predefined_cfg.num_val_episodes = args.num_val_episodes
+    predefined_cfg.num_test_episodes = args.num_test_episodes
+    predefined_cfg.query_batch_size = predefined_cfg.num_ways * predefined_cfg.num_queries
+    #### dataset config
+    dataset_path = args.dataset_prefix
+    data_config = Config.fromfile(osp.join(dataset_path, 'data_config.py'))
+    predefined_cfg.dataset_type = data_config.dataset_type
+    predefined_cfg.data_prefix = dataset_path
+    if predefined_cfg.dataset_type == 'CUBDataset':
+        predefined_cfg.dataset_num_classes = (len(data_config.ALL_CLASSES) + 1) // 2
+    else:
+        # 'MiniImageNetDataset', 'TieRedImageNetDataset'
+        predefined_cfg.dataset_num_classes = len(data_config.TRAIN_CLASSES)
+    #### meta test config
+    predefined_cfg.episodes_seed = args.episodes_seed
+    #### model
+    predefined_cfg.backbone = args.backbone
+    #### runner
+    predefined_cfg.max_epoch = args.max_epoch
+
+    #### generate new predefined config file
+    predefined_generate_path = args.config.replace('config.py', 'predefined_generate.py')
+    with open(predefined_generate_path, 'w') as f:
+        f.write(predefined_cfg.pretty_text)
+    ################################################################################################################
+    
     cfg = Config.fromfile(args.config)
     print(f'cfg:{cfg}')
     if args.options is not None:
@@ -118,11 +162,6 @@ def main():
                       'in `gpu_ids` now.')
     if args.gpus is None and args.gpu_ids is None:
         cfg.gpu_ids = [args.gpu_id]
-    
-    ###################
-    cfg.num_ways = cfg.data.val.num_ways = cfg.data.val.meta_test_cfg.num_ways = cfg.data.test.num_ways = cfg.data.test.meta_test_cfg.num_ways = args.num_ways
-    cfg.num_shots = cfg.data.val.num_shots = cfg.data.val.meta_test_cfg.num_shots = cfg.data.test.num_shots = cfg.data.test.meta_test_cfg.num_shots = args.num_shots
-    ###################
         
 
     # init distributed env first, since logger depends on the dist info.

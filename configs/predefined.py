@@ -7,7 +7,8 @@ num_test_episodes = 2000
 
 #### dataset
 dataset_type = 'CUBDataset'
-data_prefix = '/home/ghk/workerspace/datasets/classification/CUB_200_2011'
+data_prefix = '/home/ghk/workerspace/datasets/classification/omniglot'
+dataset_num_classes = 1623
 
 #### test
 test_type = 'MetaTestDataset'
@@ -17,7 +18,7 @@ test_type = 'MetaTestDataset'
 episodes_seed = 0
 
 #### model
-model_name = 'baseline'
+model_name = 'Baseline'
 backbone = 'Conv4'
 
 #### batch size

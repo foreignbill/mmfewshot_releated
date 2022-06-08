@@ -2,6 +2,9 @@
 import argparse
 import os
 import os.path as osp
+from sys import stdout, path
+__root_dir__ = os.path.realpath(os.path.join(__file__, '../../..'))
+path.append(__root_dir__)
 import time
 import warnings
 

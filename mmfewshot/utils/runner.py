@@ -94,21 +94,21 @@ class InfiniteEpochBasedRunner(EpochBasedRunner):
         while self.epoch < self._max_epochs:
             self.tensor_writer.add_scalar('progress', self.epoch / self._max_epochs, global_step=self.epoch)
 
-                mode, epochs = flow
-                if isinstance(mode, str):  # self.train() below
-                    if not hasattr(self, mode):
-                        raise ValueError(
-                            f'runner has no method named "{mode}" to run an '
-                            'epoch')
-                    epoch_runner = getattr(self, mode)
-                else:
-                    raise TypeError(
-                        'mode in workflow must be a str, but got {}'.format(
-                            type(mode)))
-                for _ in range(epochs):
-                    if mode == 'train' and self.epoch >= self._max_epochs:
-                        break
-                    epoch_runner(data_loaders[i], **kwargs)
+            mode, epochs = flow
+            if isinstance(mode, str):  # self.train() below
+                if not hasattr(self, mode):
+                    raise ValueError(
+                        f'runner has no method named "{mode}" to run an '
+                        'epoch')
+                epoch_runner = getattr(self, mode)
+            else:
+                raise TypeError(
+                    'mode in workflow must be a str, but got {}'.format(
+                        type(mode)))
+            for _ in range(epochs):
+                if mode == 'train' and self.epoch >= self._max_epochs:
+                    break
+                epoch_runner(data_loaders[i], **kwargs)
 
         time.sleep(1)  # wait for some hooks like loggers to finish
         self.call_hook('after_run')

@@ -80,6 +80,7 @@ def parse_args():
     parser.add_argument('--num_test_episodes', type=int, default=2000, help='number of test episodes')
     #### dataset config
     parser.add_argument('--dataset_prefix', type=str, default='/dataset', help='prefix of dataset')
+    parser.add_argument('--img_size', type=int, default=84, help='image size')
     #### meta test config
     parser.add_argument('--episodes_seed', type=int, default=0, help='seed for generating meta test episodes')
     #### model
@@ -113,15 +114,24 @@ def main():
     data_config = Config.fromfile(osp.join(dataset_path, 'data_config.py'))
     predefined_cfg.dataset_type = data_config.dataset_type
     predefined_cfg.data_prefix = dataset_path
+    predefined_cfg.img_size = args.img_size
+    predefined_cfg.img_resize_size = int(predefined_cfg.img_size * 1.15)
     if predefined_cfg.dataset_type == 'CUBDataset':
-        predefined_cfg.dataset_num_classes = (len(data_config.ALL_CLASSES) + 1) // 2
+        predefined_cfg.num_classes = (len(data_config.ALL_CLASSES) + 1) // 2
     else:
         # 'MiniImageNetDataset', 'TieRedImageNetDataset'
-        predefined_cfg.dataset_num_classes = len(data_config.TRAIN_CLASSES)
+        predefined_cfg.num_classes = len(data_config.TRAIN_CLASSES)
     #### meta test config
     predefined_cfg.episodes_seed = args.episodes_seed
     #### model
     predefined_cfg.backbone = args.backbone
+    if predefined_cfg.backbone == 'Conv4':
+        # in Conv4 model, out_channels is decided by input image size
+        backbone_out_channels = (predefined_cfg.img_size // 2 // 2 // 2 // 2) ** 2
+        predefined_cfg.in_channels = backbone_out_channels * 64
+    elif predefined_cfg.backbone == 'ResNet12':
+        # in ResNet12 model, out_channels was fitted to 640
+        predefined_cfg.in_channels = 640
     #### runner
     predefined_cfg.max_epoch = args.max_epoch
 
@@ -132,7 +142,6 @@ def main():
     ################################################################################################################
     
     cfg = Config.fromfile(args.config)
-    print(f'cfg:{cfg}')
     if args.options is not None:
         cfg.merge_from_dict(args.options)
     # set cudnn_benchmark

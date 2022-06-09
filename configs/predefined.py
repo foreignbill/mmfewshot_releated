@@ -8,7 +8,9 @@ num_test_episodes = 2000
 #### dataset
 dataset_type = 'CUBDataset'
 data_prefix = '/home/ghk/workerspace/datasets/classification/omniglot'
-dataset_num_classes = 1623
+num_classes = 1623
+img_size = 84
+img_resize_size = int(img_size * 1.15)
 
 #### test
 test_type = 'MetaTestDataset'
@@ -20,6 +22,7 @@ episodes_seed = 0
 #### model
 model_name = 'Baseline'
 backbone = 'Conv4'
+in_channels = 1600
 
 #### batch size
 query_batch_size = num_ways * num_queries

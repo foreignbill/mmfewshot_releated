@@ -1,14 +1,13 @@
 _base_ = ['./predefined_generate.py']
 
 #### image config
-img_size = 84
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 
 #### pipeline settings
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='RandomResizedCrop', size=img_size),
+    dict(type='RandomResizedCrop', size={{_base_.img_size}}),
     dict(type='RandomFlip', flip_prob=0.5, direction='horizontal'),
     dict(type='ColorJitter', brightness=0.4, contrast=0.4, saturation=0.4),
     dict(type='Normalize', **img_norm_cfg),
@@ -18,8 +17,8 @@ train_pipeline = [
 ]
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='Resize', size=(int(img_size * 1.15), -1)),
-    dict(type='CenterCrop', crop_size=img_size),
+    dict(type='Resize', size=({{_base_.img_resize_size}}, -1)),
+    dict(type='CenterCrop', crop_size={{_base_.img_size}}),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='ImageToTensor', keys=['img']),
     dict(type='Collect', keys=['img', 'gt_label'])
@@ -110,9 +109,9 @@ lr_config = dict(
 #### model
 model = dict(
     type='Baseline',
-    backbone=dict(type='Conv4'),
-    head=dict(type='LinearHead', num_classes={{_base_.dataset_num_classes}}, in_channels=1600),
-    meta_test_head=dict(type='LinearHead', num_classes=5, in_channels=1600))
+    backbone=dict(type={{_base_.backbone}}),
+    head=dict(type='LinearHead', num_classes={{_base_.num_classes}}, in_channels={{_base_.in_channels}}),
+    meta_test_head=dict(type='LinearHead', num_classes={{_base_.num_ways}}, in_channels={{_base_.in_channels}}))
 
 # work config
 work_dir = './work_dir'

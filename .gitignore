@@ -3,3 +3,5 @@ work_dir
 work_dir/*
 .vscode
 .vscode/*
+*/__pycache__
+*.py[cod]

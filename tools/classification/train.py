@@ -84,7 +84,7 @@ def parse_args():
     #### meta test config
     parser.add_argument('--episodes_seed', type=int, default=0, help='seed for generating meta test episodes')
     #### model
-    parser.add_argument('--backbone', type=str, default='Conv4', help='which backbone to be used, choose between Conv4 and ResNet12')
+    parser.add_argument('--backbone', type=str, default='Conv4NoPool', help='which backbone to be used, choose between Conv4NoPool and ResNet12')
     #### runner
     parser.add_argument('--max_iters', type=int, default=100000, help='max iterations of runner')
     ################################################################################################################

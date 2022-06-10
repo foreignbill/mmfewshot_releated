@@ -111,9 +111,9 @@ lr_config = dict(policy='fixed', warmup=None)
 
 #### model
 model = dict(
-    type='ProtoNet',
+    type='RelationNet',
     backbone=dict(type={{_base_.backbone}}),
-    head=dict(type='PrototypeHead'))
+    head=dict(type='RelationHead', in_channels=64, feature_size=(19, 19)))
 
 # work config
 work_dir = './work_dir'

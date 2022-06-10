@@ -111,9 +111,9 @@ lr_config = dict(policy='fixed', warmup=None)
 
 #### model
 model = dict(
-    type='MatchingNet',
-    backbone=dict(type='Conv4'),
-    head=dict(type='MatchingHead'))
+    type='ProtoNet',
+    backbone=dict(type={{_base_.backbone}}),
+    head=dict(type='PrototypeHead'))
 
 # work config
 work_dir = './work_dir'

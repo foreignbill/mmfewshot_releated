@@ -2,7 +2,7 @@ versions: "1.0"
 
 requirements: "./requirements.txt"
 
-image: "mmfewshot:1.6.0-cuda10.1-cudnn7-devel"
+image: "mmfewshot:1.7.1-cuda11.0-cudnn8-devel"
 
 tasks:
   train:

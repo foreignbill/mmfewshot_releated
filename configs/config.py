@@ -108,10 +108,10 @@ lr_config = dict(
 
 #### model
 model = dict(
-    type='Baseline',
+    type='BaselinePlus',
     backbone=dict(type={{_base_.backbone}}),
-    head=dict(type='LinearHead', num_classes={{_base_.num_classes}}, in_channels={{_base_.in_channels}}),
-    meta_test_head=dict(type='LinearHead', num_classes={{_base_.num_ways}}, in_channels={{_base_.in_channels}}))
+    head=dict(type='CosineDistanceHead', num_classes={{_base_.num_classes}}, in_channels={{_base_.in_channels}}),
+    meta_test_head=dict(type='CosineDistanceHead', num_classes={{_base_.num_ways}}, in_channels={{_base_.in_channels}}))
 
 # work config
 work_dir = './work_dir'

@@ -46,7 +46,7 @@ data = dict(
             num_ways={{_base_.num_ways}},
             # whether to cache features in fixed-backbone methods for
             # testing acceleration.
-            fast_test=False,
+            fast_test=True,
             test_set=dict(batch_size=16, num_workers=2),
             support=dict(batch_size={{_base_.support_batch_size}}, num_workers=0, num_inner_steps={{_base_.num_ways}}),
             query=dict(batch_size={{_base_.query_batch_size}}, num_workers=0))),
@@ -68,17 +68,12 @@ data = dict(
             num_ways={{_base_.num_ways}},
             # whether to cache features in fixed-backbone methods for
             # testing acceleration.
-            fast_test=False,
+            fast_test=True,
             test_set=dict(batch_size=16, num_workers=2),
             support=dict(batch_size={{_base_.support_batch_size}}, num_workers=0, num_inner_steps={{_base_.num_ways}}),
             query=dict(batch_size={{_base_.query_batch_size}}, num_workers=0))),
     samples_per_gpu=1,
     workers_per_gpu=8,
-    # train=dict(
-    #     type={{_base_.dataset_type}},
-    #     data_prefix={{_base_.data_prefix}},
-    #     subset='train',
-    #     pipeline=train_pipeline))
     train=dict(
         type='EpisodicDataset',
         num_episodes={{_base_.max_iters}},
@@ -116,12 +111,9 @@ lr_config = dict(policy='fixed', warmup=None)
 
 #### model
 model = dict(
-    type='MAML',
-    num_inner_steps=2,
-    inner_lr=0.01,
-    first_order=False,
-    backbone=dict(type={{_base_.backbone}}),
-    head=dict(type='LinearHead', num_classes={{_base_.num_ways}}, in_channels={{_base_.in_channels}}))
+    type='MatchingNet',
+    backbone=dict(type='Conv4'),
+    head=dict(type='MatchingHead'))
 
 # work config
 work_dir = './work_dir'

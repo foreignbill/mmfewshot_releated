@@ -2,6 +2,7 @@
 num_ways = 5
 num_shots = 1
 num_queries = 15
+num_train_queries = 16
 num_val_episodes = 100
 num_test_episodes = 2000
 
@@ -26,9 +27,10 @@ in_channels = 1600
 
 #### batch size
 query_batch_size = num_ways * num_queries
+support_batch_size = num_ways * num_shots
 
 #### runner
-max_epoch = 200
+max_iters = 100000
 
 #### gpu resources
 gpu_resources = 2048

@@ -46,9 +46,9 @@ data = dict(
             num_ways={{_base_.num_ways}},
             # whether to cache features in fixed-backbone methods for
             # testing acceleration.
-            fast_test=True,
+            fast_test=False,
             test_set=dict(batch_size=16, num_workers=2),
-            support=dict(batch_size=4, num_workers=0, drop_last=True, train=meta_finetune_cfg),
+            support=dict(batch_size={{_base_.support_batch_size}}, num_workers=0, num_inner_steps={{_base_.num_ways}}),
             query=dict(batch_size={{_base_.query_batch_size}}, num_workers=0))),
     test=dict(
         type={{_base_.test_type}},
@@ -68,24 +68,36 @@ data = dict(
             num_ways={{_base_.num_ways}},
             # whether to cache features in fixed-backbone methods for
             # testing acceleration.
-            fast_test=True,
+            fast_test=False,
             test_set=dict(batch_size=16, num_workers=2),
-            support=dict(batch_size=4, num_workers=0, drop_last=True, train=meta_finetune_cfg),
+            support=dict(batch_size={{_base_.support_batch_size}}, num_workers=0, num_inner_steps={{_base_.num_ways}}),
             query=dict(batch_size={{_base_.query_batch_size}}, num_workers=0))),
-    samples_per_gpu=64,
+    samples_per_gpu=1,
     workers_per_gpu=8,
+    # train=dict(
+    #     type={{_base_.dataset_type}},
+    #     data_prefix={{_base_.data_prefix}},
+    #     subset='train',
+    #     pipeline=train_pipeline))
     train=dict(
-        type={{_base_.dataset_type}},
-        data_prefix={{_base_.data_prefix}},
-        subset='train',
-        pipeline=train_pipeline))
+        type='EpisodicDataset',
+        num_episodes={{_base_.max_iters}},
+        num_ways={{_base_.num_ways}},
+        num_shots={{_base_.num_shots}},
+        # 16?
+        num_queries={{_base_.num_train_queries}},
+        dataset=dict(
+            type={{_base_.dataset_type}},
+            data_prefix={{_base_.data_prefix}},
+            subset='train',
+            pipeline=train_pipeline)))
 
 #### log releated
 log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
-checkpoint_config = dict(interval=50)
+checkpoint_config = dict(interval=4000)
 
 #### learning config
-evaluation = dict(by_epoch=True, metric='accuracy', interval=2)
+evaluation = dict(by_epoch=False, metric='accuracy', interval=2000)
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 load_from = None
@@ -94,24 +106,22 @@ workflow = [('train', 1)]
 pin_memory = True
 use_infinite_sampler = True
 seed = 0
-runner = dict(type='EpochBasedRunner', max_epochs={{_base_.max_epoch}})
+runner = dict(type='IterBasedRunner', max_iters={{_base_.max_iters}})
 
 #### learning config
-optimizer = dict(type='SGD', lr=0.05, momentum=0.9, weight_decay=0.0001)
-optimizer_config = dict(grad_clip=None)
-lr_config = dict(
-    policy='step',
-    warmup='linear',
-    warmup_iters=3000,
-    warmup_ratio=0.25,
-    step=[60, 120])
+optimizer = dict(type='Adam', lr=0.001)
+optimizer_config = dict(
+    grad_clip=None, type='GradientCumulativeOptimizerHook', cumulative_iters=8)
+lr_config = dict(policy='fixed', warmup=None)
 
 #### model
 model = dict(
-    type='BaselinePlus',
+    type='MAML',
+    num_inner_steps=2,
+    inner_lr=0.01,
+    first_order=False,
     backbone=dict(type={{_base_.backbone}}),
-    head=dict(type='CosineDistanceHead', num_classes={{_base_.num_classes}}, in_channels={{_base_.in_channels}}),
-    meta_test_head=dict(type='CosineDistanceHead', num_classes={{_base_.num_ways}}, in_channels={{_base_.in_channels}}))
+    head=dict(type='LinearHead', num_classes={{_base_.num_ways}}, in_channels={{_base_.in_channels}}))
 
 # work config
 work_dir = './work_dir'

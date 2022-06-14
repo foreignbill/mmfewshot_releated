@@ -1,6 +1,8 @@
 # workdirectory
 work_dir
+work_dirs
 work_dir/*
+work_dirs/*
 .vscode
 .vscode/*
 */__pycache__

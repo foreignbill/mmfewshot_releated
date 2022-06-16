@@ -587,7 +587,7 @@ class FewShotVOCDefaultDataset(FewShotVOCDataset):
         f'SPLIT{split}_{shot}SHOT': [
             dict(
                 type='ann_file',
-                ann_file=f'data/few_shot_ann/voc/benchmark_{shot}shot/'
+                ann_file=f'/workspace/datasets/detection/voc/few_shot_ann/voc/benchmark_{shot}shot/'
                 f'box_{shot}shot_{class_name}_train.txt',
                 ann_classes=[class_name])
             for class_name in VOC_SPLIT[f'ALL_CLASSES_SPLIT{split}']

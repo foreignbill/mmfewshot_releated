@@ -630,7 +630,7 @@ class FewShotCocoDefaultDataset(FewShotCocoDataset):
         f'{shot}SHOT': [
             dict(
                 type='ann_file',
-                ann_file=f'data/few_shot_ann/coco/benchmark_{shot}shot/'
+                ann_file=f'/workspace/datasets/detection/coco/few_shot_ann/coco/benchmark_{shot}shot/'
                 f'full_box_{shot}shot_{class_name}_trainval.json')
             for class_name in COCO_SPLIT['ALL_CLASSES']
         ]
@@ -645,7 +645,7 @@ class FewShotCocoDefaultDataset(FewShotCocoDataset):
             **coco_benchmark, 'Official_10SHOT': [
                 dict(
                     type='ann_file',
-                    ann_file='data/few_shot_ann/coco/attention_rpn_10shot/'
+                    ann_file='/workspace/datasets/detection/coco/few_shot_ann/coco/attention_rpn_10shot/'
                     'official_10_shot_from_instances_train2017.json')
             ]
         },

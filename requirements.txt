@@ -17,9 +17,6 @@ codecov==2.1.12
 colorama==0.4.4
 coloredlogs==15.0.1
 commonmark==0.9.1
-conda==4.9.2
-conda-build==3.21.4
-conda-package-handling==1.7.2
 coverage==6.4.1
 cryptography==3.2.1
 cycler==0.11.0
@@ -52,9 +49,6 @@ Markdown==3.3.7
 MarkupSafe==1.1.1
 matplotlib==3.5.2
 mccabe==0.6.1
-mkl-fft==1.2.0
-mkl-random==1.1.1
-mkl-service==2.3.0
 mmcls==0.21.0
 mmcv==1.4.7
 mmcv-full==1.4.7
@@ -122,9 +116,6 @@ threadpoolctl==3.1.0
 tifffile==2022.5.4
 toml==0.10.2
 tomli==2.0.1
-torch==1.7.1
-torchelastic==0.2.1
-torchvision==0.8.2
 tqdm==4.51.0
 traitlets==5.0.5
 typing==3.7.4.3

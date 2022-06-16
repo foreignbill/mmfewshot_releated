@@ -53,7 +53,7 @@ test_pipeline = [
             dict(type='Collect', keys=['img'])
         ])
 ]
-data_root = '/home/ghk/workerspace/datasets/detection/voc/VOCdevkit/'
+data_root = '/workspace/datasets/detection/voc/VOCdevkit/'
 data = dict(
     samples_per_gpu=2,
     workers_per_gpu=2,
@@ -68,13 +68,13 @@ data = dict(
                 dict(
                     type='ann_file',
                     ann_file=
-                    '/home/ghk/workerspace/datasets/detection/voc/VOCdevkit/VOC2007/ImageSets/Main/trainval.txt'),
+                    '/workspace/datasets/detection/voc/VOCdevkit/VOC2007/ImageSets/Main/trainval.txt'),
                 dict(
                     type='ann_file',
                     ann_file=
-                    '/home/ghk/workerspace/datasets/detection/voc/VOCdevkit/VOC2012/ImageSets/Main/trainval.txt')
+                    '/workspace/datasets/detection/voc/VOCdevkit/VOC2012/ImageSets/Main/trainval.txt')
             ],
-            img_prefix='/home/ghk/workerspace/datasets/detection/voc/VOCdevkit/',
+            img_prefix='/workspace/datasets/detection/voc/VOCdevkit/',
             multi_pipelines=dict(
                 query=[
                     dict(type='LoadImageFromFile'),
@@ -122,9 +122,9 @@ data = dict(
         ann_cfg=[
             dict(
                 type='ann_file',
-                ann_file='/home/ghk/workerspace/datasets/detection/voc/VOCdevkit/VOC2007/ImageSets/Main/test.txt')
+                ann_file='/workspace/datasets/detection/voc/VOCdevkit/VOC2007/ImageSets/Main/test.txt')
         ],
-        img_prefix='/home/ghk/workerspace/datasets/detection/voc/VOCdevkit/',
+        img_prefix='/workspace/datasets/detection/voc/VOCdevkit/',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
@@ -149,9 +149,9 @@ data = dict(
         ann_cfg=[
             dict(
                 type='ann_file',
-                ann_file='/home/ghk/workerspace/datasets/detection/voc/VOCdevkit/VOC2007/ImageSets/Main/test.txt')
+                ann_file='/workspace/datasets/detection/voc/VOCdevkit/VOC2007/ImageSets/Main/test.txt')
         ],
-        img_prefix='/home/ghk/workerspace/datasets/detection/voc/VOCdevkit/',
+        img_prefix='/workspace/datasets/detection/voc/VOCdevkit/',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
@@ -180,12 +180,12 @@ data = dict(
         ann_cfg=[
             dict(
                 type='ann_file',
-                ann_file='/home/ghk/workerspace/datasets/detection/voc/VOCdevkit/VOC2007/ImageSets/Main/trainval.txt'),
+                ann_file='/workspace/datasets/detection/voc/VOCdevkit/VOC2007/ImageSets/Main/trainval.txt'),
             dict(
                 type='ann_file',
-                ann_file='/home/ghk/workerspace/datasets/detection/voc/VOCdevkit/VOC2012/ImageSets/Main/trainval.txt')
+                ann_file='/workspace/datasets/detection/voc/VOCdevkit/VOC2012/ImageSets/Main/trainval.txt')
         ],
-        img_prefix='/home/ghk/workerspace/datasets/detection/voc/VOCdevkit/',
+        img_prefix='/workspace/datasets/detection/voc/VOCdevkit/',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(type='LoadAnnotations', with_bbox=True),

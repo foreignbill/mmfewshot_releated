@@ -1,7 +1,6 @@
 _base_ = [
-    './base-training_predefined_generate.py'
+    './fine-tuning_predefined_generate.py'
 ]
-# part 1
 img_norm_cfg = dict(
     mean=[103.53, 116.28, 123.675], std=[1.0, 1.0, 1.0], to_rgb=False)
 train_multi_pipelines = dict(
@@ -45,80 +44,77 @@ test_pipeline = [
             dict(type='Collect', keys=['img'])
         ])
 ]
-# part 2
 data = dict(
-    samples_per_gpu=2,
+    samples_per_gpu=1,
     workers_per_gpu=2,
     train=dict(
         type='QueryAwareDataset',
         num_support_ways={{_base_.num_support_ways}},
         num_support_shots={{_base_.num_support_shots}},
-        save_dataset=False,
+        save_dataset=True,
         dataset=dict(
-            # dataset type
-            # FewShotVOCDataset, FewShotCocoDataset
-            type={{_base_.dataset_type}},
-            # where ann_file storage
-            ann_cfg={{_base_.train_ann_cfg}},
+            #
+            type='FewShotVOCDefaultDataset',
+            #
+            ann_cfg=[dict(method='Attention_RPN', setting={{_base_.fine_tuning_setting}})],
             data_root={{_base_.data_root}},
             img_prefix={{_base_.image_prefix}},
             multi_pipelines=train_multi_pipelines,
-            classes='BASE_CLASSES',
+            classes='ALL_CLASSES',
+            use_difficult=False,
             instance_wise=False,
-            min_bbox_area=32 * 32,
-            dataset_name='query_support_dataset')),
+            min_bbox_area=0,
+            dataset_name='query_support_dataset',
+            num_novel_shots={{_base_.num_novel_shots}},
+            num_base_shots={{_base_.num_novel_shots}})),
     val=dict(
-        # dataset type
-        type={{_base_.dataset_type}},
+        #
+        type='FewShotVOCDataset',
         ann_cfg={{_base_.val_ann_cfg}},
         data_root={{_base_.data_root}},
         img_prefix={{_base_.image_prefix}},
         pipeline=test_pipeline,
-        classes='BASE_CLASSES'),
+        classes='ALL_CLASSES'),
     test=dict(
-        type={{_base_.dataset_type}},
+        #
+        type='FewShotVOCDataset',
         ann_cfg={{_base_.val_ann_cfg}},
+        #
         data_root={{_base_.data_root}},
         img_prefix={{_base_.image_prefix}},
         pipeline=test_pipeline,
         test_mode=True,
-        classes='BASE_CLASSES'),
-    # random sample 10 shot base instance to evaluate training
+        classes='ALL_CLASSES'),
     model_init=dict(
-        copy_from_train_dataset=False,
+        copy_from_train_dataset=True,
         samples_per_gpu=16,
         workers_per_gpu=1,
-        # dataset type
-        type={{_base_.dataset_type}},
-        ann_cfg={{_base_.train_ann_cfg}},
+        #
+        type='FewShotVOCDataset',
+        ann_cfg=None,
         data_root={{_base_.data_root}},
         img_prefix={{_base_.image_prefix}},
         pipeline=train_multi_pipelines['support'],
-        classes='BASE_CLASSES',
-        # random sample 10 shot base instance to evaluate training
-        num_base_shots=10,
+        use_difficult=False,
         instance_wise=True,
-        min_bbox_area=32 * 32,
+        num_novel_shots=None,
+        classes='ALL_CLASSES',
+        min_bbox_area=1024,
         dataset_name='model_init_dataset'))
-evaluation = {{_base_.evaluation}}
-# dict(interval=20000, metric='bbox', classwise=True)
-# evaluation = dict(interval=6000, metric='mAP')
-optimizer = dict(
-    type='SGD',
-    lr=0.004,
-    momentum=0.9,
-    weight_decay=0.0001,
-    paramwise_cfg=dict(
-        custom_keys=dict({'roi_head.bbox_head': dict(lr_mult=2.0)})))
+#
+evaluation = dict(
+    interval=100,
+    metric='mAP',
+    class_splits=['BASE_CLASSES', 'NOVEL_CLASSES'])
+optimizer = dict(type='SGD', lr=0.001, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=None)
 lr_config = dict(
     policy='step',
-    warmup='linear',
-    warmup_iters=1000,
-    warmup_ratio=0.1,
-    # differs
-    step=[112000, 120000])
-runner = dict(type='IterBasedRunner', max_iters=120000)
+    warmup=None,
+    warmup_iters=500,
+    warmup_ratio=0.001,
+    step=[300])
+runner = dict(type='IterBasedRunner', max_iters=300)
 norm_cfg = dict(type='BN', requires_grad=False)
 pretrained = 'pretrained/detectron2_resnet50_caffe.pth'
 model = dict(
@@ -132,7 +128,7 @@ model = dict(
         dilations=(1, 1, 1),
         out_indices=(2, ),
         frozen_stages=2,
-        norm_cfg=norm_cfg,
+        norm_cfg=dict(type='BN', requires_grad=False),
         norm_eval=True,
         style='caffe'),
     rpn_head=dict(
@@ -152,8 +148,8 @@ model = dict(
         loss_cls=dict(
             type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
         loss_bbox=dict(type='L1Loss', loss_weight=1.0),
-        num_support_ways=2,
-        num_support_shots=10,
+        num_support_ways={{_base_.num_support_ways}},
+        num_support_shots={{_base_.num_support_shots}},
         roi_extractor=dict(
             type='SingleRoIExtractor',
             roi_layer=dict(type='RoIAlign', output_size=14, sampling_ratio=0),
@@ -177,7 +173,7 @@ model = dict(
             stride=2,
             dilation=1,
             style='caffe',
-            norm_cfg=norm_cfg,
+            norm_cfg=dict(type='BN', requires_grad=False),
             norm_eval=True),
         bbox_roi_extractor=dict(
             type='SingleRoIExtractor',
@@ -241,7 +237,8 @@ model = dict(
                         std=0.01))
             ]),
         num_support_ways={{_base_.num_support_ways}},
-        num_support_shots={{_base_.num_support_shots}}),
+        num_support_shots={{_base_.num_support_shots}}
+    ),
     train_cfg=dict(
         rpn=dict(
             assigner=dict(
@@ -290,16 +287,19 @@ model = dict(
         rcnn=dict(
             score_thr=0.05,
             nms=dict(type='nms', iou_threshold=0.5),
-            max_per_img=100)))
-checkpoint_config = dict(interval=20000)
+            max_per_img=100)),
+    frozen_parameters=[
+        'backbone', 'shared_head', 'rpn_head', 'aggregation_layer'
+    ])
+checkpoint_config = dict(interval=100)
 log_config = dict(interval=10, hooks=[dict(type='TextLoggerHook')])
 custom_hooks = [dict(type='NumClassCheckHook')]
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = None
+load_from = 'work_dirs/base-training/voc_best.pth'
 resume_from = None
 workflow = [('train', 1)]
 use_infinite_sampler = True
 seed = 42
-work_dir = '/export/base-training'
+work_dir = './work_dirs/fine-tuning'
 gpu_ids = [0]

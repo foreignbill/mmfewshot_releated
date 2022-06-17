@@ -69,6 +69,7 @@ def parse_args():
     #### number of few-shot learning config
     parser.add_argument('--num_support_ways', type=int, default=2, help='number of support ways')
     parser.add_argument('--num_support_shots', type=int, default=10, help='number of support shots')
+    parser.add_argument('--num_novel_shots', type=int, default=1, help='number of novel shots')
     #### dataset config
     parser.add_argument('--dataset_prefix', type=str, default='/dataset', help='prefix of dataset')
     #### runner
@@ -125,6 +126,8 @@ def main():
     #### number of few-shot learning config
     predefined_cfg.num_support_ways = args.num_support_ways
     predefined_cfg.num_support_shots = args.num_support_shots
+    predefined_cfg.num_novel_shots = args.num_novel_shots
+    predefined_cfg.fine_tuning_setting = f'SPLIT_{args.num_novel_shots}SHOT'
     #### dataset config
     dataset_path = args.dataset_prefix
     data_config = Config.fromfile(osp.join(dataset_path, 'data_config.py'))
@@ -138,8 +141,6 @@ def main():
     predefined_cfg.val_ann_cfg = data_config.val_ann_cfg
     for i in range(len(predefined_cfg.val_ann_cfg)):
         predefined_cfg.val_ann_cfg[i].update({'ann_file': osp.join(predefined_cfg.image_prefix, predefined_cfg.val_ann_cfg[i]['ann_file'])})
-
-    print(predefined_cfg.train_ann_cfg)
 
     if data_config.dataset_type == 'FewShotCocoDataset':
         predefined_cfg.evaluation = dict(interval=20000, metric='bbox', classwise=True)

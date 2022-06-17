@@ -105,12 +105,10 @@ class FewShotVOCDataset(BaseFewShotDataset):
         dataset_file = osp.join(kwargs['data_root'], 'data_config.py')
         dataset_config = mmcv.Config.fromfile(dataset_file)
         VOC_SPLIT = dataset_config.VOC_SPLIT
-
         self.SPLIT = VOC_SPLIT
 
         # the split_id would be set value in `self.get_classes`
         self.split_id = None
-
         assert classes is not None, f'{self.dataset_name}: classes in ' \
                                     f'`FewShotVOCDataset` can not be None.'
 
@@ -592,28 +590,21 @@ class FewShotVOCDefaultDataset(FewShotVOCDataset):
             For example: [dict(method='TFA', setting='SPILT1_1shot')].
     """
 
-    voc_benchmark = {
-        f'SPLIT_{shot}SHOT': [
-            dict(
-                type='ann_file',
-                ann_file=f'/workspace/datasets/detection/voc/few_shot_ann/voc/benchmark_{shot}shot/'
-                f'box_{shot}shot_{class_name}_train.txt',
-                ann_classes=[class_name])
-            for class_name in VOC_SPLIT[f'ALL_CLASSES']
-        ]
-        for shot in [1, 2, 3, 5, 10]
-    }
-
-    # pre-defined annotation config for model reproducibility
-    DEFAULT_ANN_CONFIG = dict(
-        TFA=voc_benchmark,
-        FSCE=voc_benchmark,
-        Attention_RPN=voc_benchmark,
-        MPSR=voc_benchmark,
-        MetaRCNN=voc_benchmark,
-        FSDetView=voc_benchmark)
+    DEFAULT_ANN_CONFIG = dict()
 
     def __init__(self, ann_cfg: List[Dict], **kwargs) -> None:
+        # data_root
+        dataset_file = osp.join(kwargs['data_root'], 'data_config.py')
+        dataset_config = mmcv.Config.fromfile(dataset_file)
+        voc_benchmark = dataset_config.voc_benchmark
+        # pre-defined annotation config for model reproducibility
+        self.DEFAULT_ANN_CONFIG = dict(
+            TFA=voc_benchmark,
+            FSCE=voc_benchmark,
+            Attention_RPN=voc_benchmark,
+            MPSR=voc_benchmark,
+            MetaRCNN=voc_benchmark,
+            FSDetView=voc_benchmark)
         super().__init__(ann_cfg=ann_cfg, **kwargs)
 
     def ann_cfg_parser(self, ann_cfg: List[Dict]) -> List[Dict]:
@@ -640,4 +631,5 @@ class FewShotVOCDefaultDataset(FewShotVOCDataset):
                     default_ann_cfg[i]['ann_file'] = osp.join(
                         ann_root, default_ann_cfg[i]['ann_file'])
             new_ann_cfg += default_ann_cfg
+        print(f'new_ann_cfg: {new_ann_cfg}')
         return super(FewShotVOCDataset, self).ann_cfg_parser(new_ann_cfg)

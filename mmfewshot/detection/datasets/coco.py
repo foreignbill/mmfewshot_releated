@@ -17,37 +17,9 @@ from .base import BaseFewShotDataset
 
 # pre-defined classes split for few shot setting
 COCO_SPLIT = dict(
-    ALL_CLASSES=('person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
-                 'train', 'truck', 'boat', 'traffic light', 'fire hydrant',
-                 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog',
-                 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra',
-                 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie',
-                 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball',
-                 'kite', 'baseball bat', 'baseball glove', 'skateboard',
-                 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup',
-                 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
-                 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog',
-                 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant',
-                 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse',
-                 'remote', 'keyboard', 'cell phone', 'microwave', 'oven',
-                 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase',
-                 'scissors', 'teddy bear', 'hair drier', 'toothbrush'),
-    NOVEL_CLASSES=('person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
-                   'train', 'boat', 'bird', 'cat', 'dog', 'horse', 'sheep',
-                   'cow', 'bottle', 'chair', 'couch', 'potted plant',
-                   'dining table', 'tv'),
-    BASE_CLASSES=('truck', 'traffic light', 'fire hydrant', 'stop sign',
-                  'parking meter', 'bench', 'elephant', 'bear', 'zebra',
-                  'giraffe', 'backpack', 'umbrella', 'handbag', 'tie',
-                  'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball',
-                  'kite', 'baseball bat', 'baseball glove', 'skateboard',
-                  'surfboard', 'tennis racket', 'wine glass', 'cup', 'fork',
-                  'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich',
-                  'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut',
-                  'cake', 'bed', 'toilet', 'laptop', 'mouse', 'remote',
-                  'keyboard', 'cell phone', 'microwave', 'oven', 'toaster',
-                  'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
-                  'teddy bear', 'hair drier', 'toothbrush'))
+    ALL_CLASSES=(),
+    NOVEL_CLASSES=(),
+    BASE_CLASSES=())
 
 
 @DATASETS.register_module()
@@ -92,6 +64,10 @@ class FewShotCocoDataset(BaseFewShotDataset, CocoDataset):
                 if test_mode else 'Train dataset'
         else:
             self.dataset_name = dataset_name
+        
+        dataset_file = osp.join(kwargs['data_root'], 'data_config.py')
+        dataset_config = mmcv.Config.fromfile(dataset_file)
+        COCO_SPLIT = dataset_config.COCO_SPLIT
         self.SPLIT = COCO_SPLIT
         assert classes is not None, f'{self.dataset_name}: classes in ' \
                                     f'`FewShotCocoDataset` can not be None.'
@@ -102,6 +78,7 @@ class FewShotCocoDataset(BaseFewShotDataset, CocoDataset):
         self.num_base_shots = num_base_shots
         self.min_bbox_area = min_bbox_area
         self.CLASSES = self.get_classes(classes)
+        print(f'CLASSES: {self.CLASSES}')
         if ann_shot_filter is None:
             if num_novel_shots is not None or num_base_shots is not None:
                 ann_shot_filter = self._create_ann_shot_filter()

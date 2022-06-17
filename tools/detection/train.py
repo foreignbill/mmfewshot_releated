@@ -60,11 +60,23 @@ def parse_args():
         default=0,
         help='id of gpu to use '
         '(only applicable to non-distributed testing)')
-    parser.add_argument('--seed', type=int, default=None, help='random seed')
     parser.add_argument(
         '--deterministic',
         action='store_true',
         help='whether to set deterministic options for CUDNN backend.')
+    
+    ########################################################################
+    #### number of few-shot learning config
+    parser.add_argument('--num_support_ways', type=int, default=2, help='number of support ways')
+    parser.add_argument('--num_support_shots', type=int, default=10, help='number of support shots')
+    #### dataset config
+    parser.add_argument('--dataset_prefix', type=str, default='/dataset', help='prefix of dataset')
+    #### runner
+    parser.add_argument('--max_iters', type=int, default=120000, help='max iterations of runner')
+    #### seed
+    parser.add_argument('--seed', type=int, default=None, help='random seed')
+    ########################################################################
+
     parser.add_argument(
         '--options',
         nargs='+',
@@ -106,6 +118,42 @@ def parse_args():
 def main():
     args = parse_args()
 
+    ################################################################################################################
+    #### predefined path
+    predefined_path = args.config.replace('config.py', 'predefined.py')
+    predefined_cfg = Config.fromfile(predefined_path)
+    #### number of few-shot learning config
+    predefined_cfg.num_support_ways = args.num_support_ways
+    predefined_cfg.num_support_shots = args.num_support_shots
+    #### dataset config
+    dataset_path = args.dataset_prefix
+    data_config = Config.fromfile(osp.join(dataset_path, 'data_config.py'))
+    predefined_cfg.dataset_type = data_config.dataset_type
+    predefined_cfg.data_root = args.dataset_prefix
+    predefined_cfg.image_prefix = osp.join(dataset_path, data_config.image_prefix)
+
+    predefined_cfg.train_ann_cfg = data_config.train_ann_cfg
+    for i in range(len(predefined_cfg.train_ann_cfg)):
+        predefined_cfg.train_ann_cfg[i].update({'ann_file': osp.join(predefined_cfg.image_prefix, predefined_cfg.train_ann_cfg[i]['ann_file'])})
+    predefined_cfg.val_ann_cfg = data_config.val_ann_cfg
+    for i in range(len(predefined_cfg.val_ann_cfg)):
+        predefined_cfg.val_ann_cfg[i].update({'ann_file': osp.join(predefined_cfg.image_prefix, predefined_cfg.val_ann_cfg[i]['ann_file'])})
+
+    print(predefined_cfg.train_ann_cfg)
+
+    if data_config.dataset_type == 'FewShotCocoDataset':
+        predefined_cfg.evaluation = dict(interval=20000, metric='bbox', classwise=True)
+    elif data_config.dataset_type == 'FewShotVOCDataset':
+        predefined_cfg.evaluation = dict(interval=6000, metric='mAP')
+    #### runner
+    predefined_cfg.max_iters = args.max_iters
+
+    #### generate new predefined config file
+    predefined_generate_path = args.config.replace('config.py', 'predefined_generate.py')
+    with open(predefined_generate_path, 'w') as f:
+        f.write(predefined_cfg.pretty_text)
+    # return None
+    ################################################################################################################
     cfg = Config.fromfile(args.config)
 
     if args.cfg_options is not None:

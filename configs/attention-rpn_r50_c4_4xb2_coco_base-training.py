@@ -67,9 +67,9 @@ data = dict(
             ann_cfg=[
                 dict(
                     type='ann_file',
-                    ann_file= data_root + 'few_shot_ann/coco/annotations/train.json')
+                    ann_file= data_root + 'coco/annotations/train.json')
             ],
-            img_prefix='/workspace/datasets/detection/coco/coco/',
+            img_prefix=data_root,
             multi_pipelines=dict(
                 query=[
                     dict(type='LoadImageFromFile'),
@@ -116,9 +116,9 @@ data = dict(
         ann_cfg=[
             dict(
                 type='ann_file',
-                ann_file= data_root + 'few_shot_ann/coco/annotations/val.json')
+                ann_file= 'coco/annotations/val.json')
         ],
-        img_prefix='/workspace/datasets/detection/coco/coco/',
+        img_prefix=data_root,
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
@@ -143,9 +143,9 @@ data = dict(
         ann_cfg=[
             dict(
                 type='ann_file',
-                ann_file= data_root + 'few_shot_ann/coco/annotations/val.json')
+                ann_file= 'coco/annotations/val.json')
         ],
-        img_prefix='/workspace/datasets/detection/coco/coco/',
+        img_prefix=data_root,
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
@@ -174,9 +174,9 @@ data = dict(
         ann_cfg=[
             dict(
                 type='ann_file',
-                ann_file= data_root + 'few_shot_ann/coco/annotations/train.json')
+                ann_file= data_root + 'coco/annotations/train.json')
         ],
-        img_prefix='/workspace/datasets/detection/coco/coco/',
+        img_prefix=data_root,
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(type='LoadAnnotations', with_bbox=True),
@@ -198,7 +198,7 @@ data = dict(
         instance_wise=True,
         min_bbox_area=1024,
         dataset_name='model_init_dataset'))
-evaluation = dict(interval=60000, metric='bbox', classwise=True)
+evaluation = dict(interval=200, metric='bbox', classwise=True)
 optimizer = dict(
     type='SGD',
     lr=0.004,

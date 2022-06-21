@@ -7,3 +7,4 @@ work_dirs/*
 .vscode/*
 */__pycache__
 *.py[cod]
+pretrained/*

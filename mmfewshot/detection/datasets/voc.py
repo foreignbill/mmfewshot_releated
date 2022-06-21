@@ -631,5 +631,4 @@ class FewShotVOCDefaultDataset(FewShotVOCDataset):
                     default_ann_cfg[i]['ann_file'] = osp.join(
                         ann_root, default_ann_cfg[i]['ann_file'])
             new_ann_cfg += default_ann_cfg
-        print(f'new_ann_cfg: {new_ann_cfg}')
         return super(FewShotVOCDataset, self).ann_cfg_parser(new_ann_cfg)

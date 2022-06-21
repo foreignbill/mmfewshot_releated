@@ -127,25 +127,27 @@ def main():
     predefined_cfg.num_support_ways = args.num_support_ways
     predefined_cfg.num_support_shots = args.num_support_shots
     predefined_cfg.num_novel_shots = args.num_novel_shots
-    predefined_cfg.fine_tuning_setting = f'SPLIT_{args.num_novel_shots}SHOT'
+    predefined_cfg.fine_tuning_setting = f'{args.num_novel_shots}SHOT'
     #### dataset config
     dataset_path = args.dataset_prefix
     data_config = Config.fromfile(osp.join(dataset_path, 'data_config.py'))
     predefined_cfg.dataset_type = data_config.dataset_type
     predefined_cfg.data_root = args.dataset_prefix
-    predefined_cfg.image_prefix = osp.join(dataset_path, data_config.image_prefix)
+    predefined_cfg.img_prefix = osp.join(dataset_path, data_config.img_prefix)
 
     predefined_cfg.train_ann_cfg = data_config.train_ann_cfg
     for i in range(len(predefined_cfg.train_ann_cfg)):
-        predefined_cfg.train_ann_cfg[i].update({'ann_file': osp.join(predefined_cfg.image_prefix, predefined_cfg.train_ann_cfg[i]['ann_file'])})
+        predefined_cfg.train_ann_cfg[i].update({'ann_file': osp.join(predefined_cfg.img_prefix, predefined_cfg.train_ann_cfg[i]['ann_file'])})
     predefined_cfg.val_ann_cfg = data_config.val_ann_cfg
     for i in range(len(predefined_cfg.val_ann_cfg)):
-        predefined_cfg.val_ann_cfg[i].update({'ann_file': osp.join(predefined_cfg.image_prefix, predefined_cfg.val_ann_cfg[i]['ann_file'])})
+        predefined_cfg.val_ann_cfg[i].update({'ann_file': osp.join(predefined_cfg.img_prefix, predefined_cfg.val_ann_cfg[i]['ann_file'])})
 
     if data_config.dataset_type == 'FewShotCocoDataset':
         predefined_cfg.evaluation = dict(interval=20000, metric='bbox', classwise=True)
+        predefined_cfg.fine_tuning_dataset_type = 'FewShotCocoDefaultDataset'
     elif data_config.dataset_type == 'FewShotVOCDataset':
         predefined_cfg.evaluation = dict(interval=6000, metric='mAP')
+        predefined_cfg.fine_tuning_dataset_type = 'FewShotVOCDefaultDataset'
     #### runner
     predefined_cfg.max_iters = args.max_iters
 
@@ -202,6 +204,13 @@ def main():
         rank, world_size = get_dist_info()
         # re-set gpu_ids with distributed training mode
         cfg.gpu_ids = range(world_size)
+    # if fine tuning, use different data
+    if [key for key in cfg].count('data') == 0:
+        if data_config.dataset_type == 'FewShotCocoDataset':
+            cfg.data = cfg.coco_data
+        elif data_config.dataset_type == 'FewShotVOCDataset':
+            cfg.data = cfg.voc_data
+    #
     # create work_dir
     mmcv.mkdir_or_exist(osp.abspath(cfg.work_dir))
     # dump config

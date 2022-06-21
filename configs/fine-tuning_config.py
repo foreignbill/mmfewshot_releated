@@ -44,7 +44,8 @@ test_pipeline = [
             dict(type='Collect', keys=['img'])
         ])
 ]
-data = dict(
+# VOC
+voc_data = dict(
     samples_per_gpu=1,
     workers_per_gpu=2,
     train=dict(
@@ -53,12 +54,10 @@ data = dict(
         num_support_shots={{_base_.num_support_shots}},
         save_dataset=True,
         dataset=dict(
-            #
-            type='FewShotVOCDefaultDataset',
-            #
+            type={{_base_.fine_tuning_dataset_type}},
             ann_cfg=[dict(method='Attention_RPN', setting={{_base_.fine_tuning_setting}})],
             data_root={{_base_.data_root}},
-            img_prefix={{_base_.image_prefix}},
+            img_prefix={{_base_.img_prefix}},
             multi_pipelines=train_multi_pipelines,
             classes='ALL_CLASSES',
             use_difficult=False,
@@ -69,19 +68,19 @@ data = dict(
             num_base_shots={{_base_.num_novel_shots}})),
     val=dict(
         #
-        type='FewShotVOCDataset',
+        type={{_base_.dataset_type}},
         ann_cfg={{_base_.val_ann_cfg}},
         data_root={{_base_.data_root}},
-        img_prefix={{_base_.image_prefix}},
+        img_prefix={{_base_.img_prefix}},
         pipeline=test_pipeline,
         classes='ALL_CLASSES'),
     test=dict(
         #
-        type='FewShotVOCDataset',
+        type={{_base_.dataset_type}},
         ann_cfg={{_base_.val_ann_cfg}},
         #
         data_root={{_base_.data_root}},
-        img_prefix={{_base_.image_prefix}},
+        img_prefix={{_base_.img_prefix}},
         pipeline=test_pipeline,
         test_mode=True,
         classes='ALL_CLASSES'),
@@ -90,10 +89,10 @@ data = dict(
         samples_per_gpu=16,
         workers_per_gpu=1,
         #
-        type='FewShotVOCDataset',
+        type={{_base_.dataset_type}},
         ann_cfg=None,
         data_root={{_base_.data_root}},
-        img_prefix={{_base_.image_prefix}},
+        img_prefix={{_base_.img_prefix}},
         pipeline=train_multi_pipelines['support'],
         use_difficult=False,
         instance_wise=True,
@@ -101,10 +100,62 @@ data = dict(
         classes='ALL_CLASSES',
         min_bbox_area=1024,
         dataset_name='model_init_dataset'))
-#
+
+# COCO
+coco_data = dict(
+    samples_per_gpu=1,
+    workers_per_gpu=2,
+    train=dict(
+        type='QueryAwareDataset',
+        num_support_ways={{_base_.num_support_ways}},
+        num_support_shots={{_base_.num_support_shots}},
+        save_dataset=True,
+        dataset=dict(
+            type='FewShotCocoDefaultDataset',
+            ann_cfg=[dict(method='Attention_RPN', setting='10SHOT')],
+            data_root={{_base_.data_root}},
+            img_prefix={{_base_.img_prefix}},
+            num_novel_shots={{_base_.num_novel_shots}},
+            num_base_shots=None,
+            multi_pipelines=train_multi_pipelines,
+            classes='NOVEL_CLASSES',
+            instance_wise=False,
+            min_bbox_area=0,
+            dataset_name='query_support_dataset'),
+        repeat_times=50),
+    val=dict(
+        type='FewShotCocoDataset',
+        ann_cfg={{_base_.val_ann_cfg}},
+        data_root={{_base_.data_root}},
+        img_prefix={{_base_.img_prefix}},
+        pipeline=test_pipeline,
+        classes='NOVEL_CLASSES'),
+    test=dict(
+        type='FewShotCocoDataset',
+        ann_cfg={{_base_.val_ann_cfg}},
+        data_root={{_base_.data_root}},
+        img_prefix={{_base_.img_prefix}},
+        pipeline=test_pipeline,
+        test_mode=True,
+        classes='NOVEL_CLASSES'),
+    model_init=dict(
+        copy_from_train_dataset=True,
+        samples_per_gpu=16,
+        workers_per_gpu=1,
+        type='FewShotCocoDataset',
+        ann_cfg=None,
+        data_root={{_base_.data_root}},
+        img_prefix={{_base_.img_prefix}},
+        pipeline=train_multi_pipelines['support'],
+        classes='NOVEL_CLASSES',
+        num_novel_shots=None,
+        num_base_shots=None,
+        instance_wise=True,
+        min_bbox_area=1024,
+        dataset_name='model_init_dataset'))
 evaluation = dict(
-    interval=100,
-    metric='mAP',
+    # interval=100,
+    # metric='mAP',
     class_splits=['BASE_CLASSES', 'NOVEL_CLASSES'])
 optimizer = dict(type='SGD', lr=0.001, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=None)
@@ -113,8 +164,8 @@ lr_config = dict(
     warmup=None,
     warmup_iters=500,
     warmup_ratio=0.001,
-    step=[300])
-runner = dict(type='IterBasedRunner', max_iters=300)
+    step=[{{_base_.max_iters}}])
+runner = dict(type='IterBasedRunner', max_iters={{_base_.max_iters}})
 norm_cfg = dict(type='BN', requires_grad=False)
 pretrained = 'pretrained/detectron2_resnet50_caffe.pth'
 model = dict(
@@ -292,11 +343,11 @@ model = dict(
         'backbone', 'shared_head', 'rpn_head', 'aggregation_layer'
     ])
 checkpoint_config = dict(interval=100)
-log_config = dict(interval=10, hooks=[dict(type='TextLoggerHook')])
+log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
 custom_hooks = [dict(type='NumClassCheckHook')]
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = 'work_dirs/base-training/voc_best.pth'
+load_from = 'work_dirs/base-training/coco_best.pth'
 resume_from = None
 workflow = [('train', 1)]
 use_infinite_sampler = True

@@ -603,34 +603,27 @@ class FewShotCocoDefaultDataset(FewShotCocoDataset):
             annotation from `DEFAULT_ANN_CONFIG`.
             For example: [dict(method='TFA', setting='1shot')].
     """
-    coco_benchmark = {
-        f'{shot}SHOT': [
-            dict(
-                type='ann_file',
-                ann_file=f'/workspace/datasets/detection/coco/few_shot_ann/coco/benchmark_{shot}shot/'
-                f'full_box_{shot}shot_{class_name}_trainval.json')
-            for class_name in COCO_SPLIT['ALL_CLASSES']
-        ]
-        for shot in [10, 30]
-    }
-
-    # pre-defined annotation config for model reproducibility
-    DEFAULT_ANN_CONFIG = dict(
-        TFA=coco_benchmark,
-        FSCE=coco_benchmark,
-        Attention_RPN={
-            **coco_benchmark, 'Official_10SHOT': [
-                dict(
-                    type='ann_file',
-                    ann_file='/workspace/datasets/detection/coco/few_shot_ann/coco/attention_rpn_10shot/'
-                    'official_10_shot_from_instances_train2017.json')
-            ]
-        },
-        MPSR=coco_benchmark,
-        MetaRCNN=coco_benchmark,
-        FSDetView=coco_benchmark)
 
     def __init__(self, ann_cfg: List[Dict], **kwargs) -> None:
+        # data_root
+        dataset_file = osp.join(kwargs['data_root'], 'data_config.py')
+        dataset_config = mmcv.Config.fromfile(dataset_file)
+        coco_benchmark = dataset_config.coco_benchmark
+        # pre-defined annotation config for model reproducibility
+        self.DEFAULT_ANN_CONFIG = dict(
+            TFA=coco_benchmark,
+            FSCE=coco_benchmark,
+            Attention_RPN={
+                **coco_benchmark, 'Official_10SHOT': [
+                    dict(
+                        type='ann_file',
+                        ann_file='few_shot_ann/coco/attention_rpn_10shot/'
+                        'official_10_shot_from_instances_train2017.json')
+                ]
+            },
+            MPSR=coco_benchmark,
+            MetaRCNN=coco_benchmark,
+            FSDetView=coco_benchmark)
         super().__init__(ann_cfg=ann_cfg, **kwargs)
 
     def ann_cfg_parser(self, ann_cfg: List[Dict]) -> List[Dict]:

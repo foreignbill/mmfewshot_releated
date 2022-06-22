@@ -117,8 +117,8 @@ lr_config = dict(
     warmup_iters=1000,
     warmup_ratio=0.1,
     # differs
-    step=[112000, 120000])
-runner = dict(type='IterBasedRunner', max_iters=120000)
+    step=[{{_base_.max_iters}}])
+runner = dict(type='IterBasedRunner', max_iters={{_base_.max_iters}})
 norm_cfg = dict(type='BN', requires_grad=False)
 pretrained = 'pretrained/detectron2_resnet50_caffe.pth'
 model = dict(
@@ -292,7 +292,7 @@ model = dict(
             nms=dict(type='nms', iou_threshold=0.5),
             max_per_img=100)))
 checkpoint_config = dict(interval=20000)
-log_config = dict(interval=10, hooks=[dict(type='TextLoggerHook')])
+log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
 custom_hooks = [dict(type='NumClassCheckHook')]
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
@@ -301,5 +301,5 @@ resume_from = None
 workflow = [('train', 1)]
 use_infinite_sampler = True
 seed = 42
-work_dir = '/export/base-training'
+work_dir = './work_dirs/base-training'
 gpu_ids = [0]

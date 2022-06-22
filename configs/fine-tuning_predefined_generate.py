@@ -1,31 +1,24 @@
 num_support_ways = 2
-num_support_shots = 5
+num_support_shots = 10
 num_novel_shots = 10
-dataset_type = 'FewShotVOCDataset'
-data_root = '/workspace/datasets/detection/voc/'
-img_prefix = '/workspace/datasets/detection/voc/VOCdevkit/'
+dataset_type = 'FewShotCocoDataset'
+data_root = '/workspace/datasets/detection/coco/'
+img_prefix = '/workspace/datasets/detection/coco/coco/'
 split_prefix = 'few_shot_ann/'
 ann_root = ''
 train_ann_cfg = [
     dict(
         type='ann_file',
         ann_file=
-        '/workspace/datasets/detection/voc/VOCdevkit/VOC2007/ImageSets/Main/trainval.txt'
-    ),
-    dict(
-        type='ann_file',
-        ann_file=
-        '/workspace/datasets/detection/voc/VOCdevkit/VOC2012/ImageSets/Main/trainval.txt'
-    )
+        '/workspace/datasets/detection/coco/coco/annotations/train.json')
 ]
 val_ann_cfg = [
     dict(
         type='ann_file',
-        ann_file=
-        '/workspace/datasets/detection/voc/VOCdevkit/VOC2007/ImageSets/Main/test.txt'
+        ann_file='/workspace/datasets/detection/coco/coco/annotations/val.json'
     )
 ]
 fine_tuning_setting = '10SHOT'
-evaluation = dict(interval=6000, metric='mAP')
-fine_tuning_dataset_type = 'FewShotVOCDefaultDataset'
-max_iters = 120000
+evaluation = dict(interval=20000, metric='bbox', classwise=True)
+fine_tuning_dataset_type = 'FewShotCocoDefaultDataset'
+max_iters = 100

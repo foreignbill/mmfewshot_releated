@@ -127,7 +127,8 @@ def build_dataset(cfg: ConfigDict,
 
     # save dataset for the reproducibility
     if rank == 0 and save_dataset:
-        save_dataset_path = osp.join(work_dir, f'{timestamp}_saved_data.json')
+        # remove timestamp
+        save_dataset_path = osp.join(work_dir, f'saved_data.json')
         if hasattr(dataset, 'save_data_infos'):
             dataset.save_data_infos(save_dataset_path)
         else:

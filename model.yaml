@@ -6,17 +6,19 @@ image: "mmfewshot:1.7.1-cuda11.0-cudnn8-devel"
 
 tasks:
   train:
-    entrypoints: "python ./tools/classification/train.py ./configs/config.py"
+    entrypoints: "python ./tools/detection/train.py ./configs/base-training_config.py"
     args: 
-      num_ways:
-      num_shots:
-      num_queries:
-      num_val_episodes:
-      num_test_episodes:
-      img_size:
-      episodes_seed:
-      backbone:
-      max_epoch:
-  test:
-    entrypoints: "python ./tools/classification/test.py ./configs/config.py /export/best_accuracy_mean.pth"
-      metrics:
+      num_support_ways:
+      num_support_shots:
+      num_novel_shots:
+      max_iters:
+      seed:
+  fine_tuning:
+    entrypoints: "python ./tools/detection/train.py ./configs/fine-tuning_config.py /export/best_accuracy_mean.pth"
+      num_support_ways:
+      num_support_shots:
+      num_novel_shots:
+      max_iters:
+      seed:
+  visualize:
+    entrypoints: "python ./tools/detection/misc/visualize_saved_dataset.py --src /export/fine-tuning/saved_data.json --out /export/visualize/"

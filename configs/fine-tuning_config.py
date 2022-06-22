@@ -347,10 +347,10 @@ log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
 custom_hooks = [dict(type='NumClassCheckHook')]
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = 'work_dirs/latest.pth'
+load_from = '/export/best.pth'
 resume_from = None
 workflow = [('train', 1)]
 use_infinite_sampler = True
 seed = 42
-work_dir = './work_dirs/fine-tuning'
+work_dir = '/export/fine-tuning'
 gpu_ids = [0]

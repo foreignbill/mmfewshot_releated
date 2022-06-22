@@ -301,5 +301,5 @@ resume_from = None
 workflow = [('train', 1)]
 use_infinite_sampler = True
 seed = 42
-work_dir = './work_dirs/base-training'
+work_dir = '/export/base-training'
 gpu_ids = [0]

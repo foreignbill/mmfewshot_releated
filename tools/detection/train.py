@@ -142,14 +142,15 @@ def main():
     for i in range(len(predefined_cfg.val_ann_cfg)):
         predefined_cfg.val_ann_cfg[i].update({'ann_file': osp.join(predefined_cfg.img_prefix, predefined_cfg.val_ann_cfg[i]['ann_file'])})
 
-    if data_config.dataset_type == 'FewShotCocoDataset':
-        predefined_cfg.evaluation = dict(interval=20000, metric='bbox', classwise=True)
-        predefined_cfg.fine_tuning_dataset_type = 'FewShotCocoDefaultDataset'
-    elif data_config.dataset_type == 'FewShotVOCDataset':
-        predefined_cfg.evaluation = dict(interval=6000, metric='mAP')
-        predefined_cfg.fine_tuning_dataset_type = 'FewShotVOCDefaultDataset'
     #### runner
     predefined_cfg.max_iters = args.max_iters
+
+    if data_config.dataset_type == 'FewShotCocoDataset':
+        predefined_cfg.evaluation = dict(interval=min(20000, predefined_cfg.max_iters), metric='bbox', classwise=True)
+        predefined_cfg.fine_tuning_dataset_type = 'FewShotCocoDefaultDataset'
+    elif data_config.dataset_type == 'FewShotVOCDataset':
+        predefined_cfg.evaluation = dict(interval=min(6000, predefined_cfg.max_iters), metric='mAP')
+        predefined_cfg.fine_tuning_dataset_type = 'FewShotVOCDefaultDataset'
 
     #### generate new predefined config file
     predefined_generate_path = args.config.replace('config.py', 'predefined_generate.py')

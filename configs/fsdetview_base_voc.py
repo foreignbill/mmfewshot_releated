@@ -11,7 +11,6 @@ train_multi_pipelines = dict(
             mean=[103.53, 116.28, 123.675],
             std=[1.0, 1.0, 1.0],
             to_rgb=False),
-        dict(type='Pad', size_divisor=32),
         dict(type='DefaultFormatBundle'),
         dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
     ],
@@ -46,21 +45,30 @@ test_pipeline = [
             dict(type='Collect', keys=['img'])
         ])
 ]
-data_root = 'data/coco/'
+data_root = 'data/VOCdevkit/'
 data = dict(
     samples_per_gpu=4,
     workers_per_gpu=2,
     train=dict(
         type='NWayKShotDataset',
-        num_support_ways=80,
+        num_support_ways=15,
         num_support_shots=1,
-        one_support_shot_per_image=False,
-        num_used_support_shots=10,
-        save_dataset=True,
+        one_support_shot_per_image=True,
+        num_used_support_shots=200,
+        save_dataset=False,
         dataset=dict(
-            type='FewShotCocoDefaultDataset',
-            ann_cfg=[dict(method='MetaRCNN', setting='10SHOT')],
-            img_prefix='data/coco/',
+            type='FewShotVOCDataset',
+            ann_cfg=[
+                dict(
+                    type='ann_file',
+                    ann_file=
+                    'data/VOCdevkit/VOC2007/ImageSets/Main/trainval.txt'),
+                dict(
+                    type='ann_file',
+                    ann_file=
+                    'data/VOCdevkit/VOC2012/ImageSets/Main/trainval.txt')
+            ],
+            img_prefix='data/VOCdevkit/',
             multi_pipelines=dict(
                 query=[
                     dict(type='LoadImageFromFile'),
@@ -73,7 +81,6 @@ data = dict(
                         mean=[103.53, 116.28, 123.675],
                         std=[1.0, 1.0, 1.0],
                         to_rgb=False),
-                    dict(type='Pad', size_divisor=32),
                     dict(type='DefaultFormatBundle'),
                     dict(
                         type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
@@ -92,19 +99,65 @@ data = dict(
                     dict(
                         type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
                 ]),
-            classes='ALL_CLASSES',
+            classes='BASE_CLASSES_SPLIT1',
+            use_difficult=True,
             instance_wise=False,
-            dataset_name='query_support_dataset',
-            num_novel_shots=10,
-            num_base_shots=10)),
+            dataset_name='query_dataset'),
+        support_dataset=dict(
+            type='FewShotVOCDataset',
+            ann_cfg=[
+                dict(
+                    type='ann_file',
+                    ann_file=
+                    'data/VOCdevkit/VOC2007/ImageSets/Main/trainval.txt'),
+                dict(
+                    type='ann_file',
+                    ann_file=
+                    'data/VOCdevkit/VOC2012/ImageSets/Main/trainval.txt')
+            ],
+            img_prefix='data/VOCdevkit/',
+            multi_pipelines=dict(
+                query=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations', with_bbox=True),
+                    dict(
+                        type='Resize', img_scale=(1000, 600), keep_ratio=True),
+                    dict(type='RandomFlip', flip_ratio=0.5),
+                    dict(
+                        type='Normalize',
+                        mean=[103.53, 116.28, 123.675],
+                        std=[1.0, 1.0, 1.0],
+                        to_rgb=False),
+                    dict(type='DefaultFormatBundle'),
+                    dict(
+                        type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+                ],
+                support=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations', with_bbox=True),
+                    dict(
+                        type='Normalize',
+                        mean=[103.53, 116.28, 123.675],
+                        std=[1.0, 1.0, 1.0],
+                        to_rgb=False),
+                    dict(type='GenerateMask', target_size=(224, 224)),
+                    dict(type='RandomFlip', flip_ratio=0.0),
+                    dict(type='DefaultFormatBundle'),
+                    dict(
+                        type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+                ]),
+            classes='BASE_CLASSES_SPLIT1',
+            use_difficult=False,
+            instance_wise=False,
+            dataset_name='support_dataset')),
     val=dict(
-        type='FewShotCocoDataset',
+        type='FewShotVOCDataset',
         ann_cfg=[
             dict(
                 type='ann_file',
-                ann_file='data/few_shot_ann/coco/annotations/val.json')
+                ann_file='data/VOCdevkit/VOC2007/ImageSets/Main/test.txt')
         ],
-        img_prefix='data/coco/',
+        img_prefix='data/VOCdevkit/',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
@@ -123,15 +176,15 @@ data = dict(
                     dict(type='Collect', keys=['img'])
                 ])
         ],
-        classes='ALL_CLASSES'),
+        classes='BASE_CLASSES_SPLIT1'),
     test=dict(
-        type='FewShotCocoDataset',
+        type='FewShotVOCDataset',
         ann_cfg=[
             dict(
                 type='ann_file',
-                ann_file='data/few_shot_ann/coco/annotations/val.json')
+                ann_file='data/VOCdevkit/VOC2007/ImageSets/Main/test.txt')
         ],
-        img_prefix='data/coco/',
+        img_prefix='data/VOCdevkit/',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
@@ -151,14 +204,14 @@ data = dict(
                 ])
         ],
         test_mode=True,
-        classes='ALL_CLASSES'),
+        classes='BASE_CLASSES_SPLIT1'),
     model_init=dict(
         copy_from_train_dataset=True,
         samples_per_gpu=16,
         workers_per_gpu=1,
-        type='FewShotCocoDataset',
+        type='FewShotVOCDataset',
         ann_cfg=None,
-        img_prefix='data/coco/',
+        img_prefix='data/VOCdevkit/',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(type='LoadAnnotations', with_bbox=True),
@@ -172,33 +225,28 @@ data = dict(
             dict(type='DefaultFormatBundle'),
             dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
         ],
+        use_difficult=False,
         instance_wise=True,
-        classes='ALL_CLASSES',
-        dataset_name='model_init_dataset',
-        num_novel_shots=10,
-        num_base_shots=10))
-evaluation = dict(
-    interval=1000,
-    metric='bbox',
-    classwise=True,
-    class_splits=['BASE_CLASSES', 'NOVEL_CLASSES'])
-optimizer = dict(type='SGD', lr=0.001, momentum=0.9, weight_decay=0.0001)
+        classes='BASE_CLASSES_SPLIT1',
+        dataset_name='model_init_dataset'))
+evaluation = dict(interval=6000, metric='mAP')
+optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=None)
 lr_config = dict(
     policy='step',
-    warmup=None,
-    warmup_iters=500,
+    warmup='linear',
+    warmup_iters=100,
     warmup_ratio=0.001,
-    step=[5000])
-runner = dict(type='IterBasedRunner', max_iters=5000)
+    step=[16000])
+runner = dict(type='IterBasedRunner', max_iters=18000)
 norm_cfg = dict(type='BN', requires_grad=False)
-pretrained = 'open-mmlab://detectron2/resnet50_caffe'
+pretrained = 'open-mmlab://detectron2/resnet101_caffe'
 model = dict(
-    type='MetaRCNN',
-    pretrained='open-mmlab://detectron2/resnet50_caffe',
+    type='FSDetView',
+    pretrained='open-mmlab://detectron2/resnet101_caffe',
     backbone=dict(
         type='ResNetWithMetaConv',
-        depth=50,
+        depth=101,
         num_stages=3,
         strides=(1, 2, 2),
         dilations=(1, 1, 1),
@@ -225,10 +273,10 @@ model = dict(
             type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
         loss_bbox=dict(type='L1Loss', loss_weight=1.0)),
     roi_head=dict(
-        type='MetaRCNNRoIHead',
+        type='FSDetViewRoIHead',
         shared_head=dict(
             type='MetaRCNNResLayer',
-            pretrained='open-mmlab://detectron2/resnet50_caffe',
+            pretrained='open-mmlab://detectron2/resnet101_caffe',
             depth=50,
             stage=3,
             stride=2,
@@ -245,8 +293,8 @@ model = dict(
             type='MetaBBoxHead',
             with_avg_pool=False,
             roi_feat_size=1,
-            in_channels=2048,
-            num_classes=80,
+            in_channels=4096,
+            num_classes=15,
             bbox_coder=dict(
                 type='DeltaXYWHBBoxCoder',
                 target_means=[0.0, 0.0, 0.0, 0.0],
@@ -255,7 +303,7 @@ model = dict(
             loss_cls=dict(
                 type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
             loss_bbox=dict(type='SmoothL1Loss', loss_weight=1.0),
-            num_meta_classes=80,
+            num_meta_classes=15,
             meta_cls_in_channels=2048,
             with_meta_cls_loss=True,
             loss_meta=dict(
@@ -264,9 +312,23 @@ model = dict(
             type='AggregationLayer',
             aggregator_cfgs=[
                 dict(
-                    type='DotProductAggregator',
+                    type='DepthWiseCorrelationAggregator',
                     in_channels=2048,
-                    with_fc=False)
+                    out_channels=1024,
+                    with_fc=True),
+                dict(
+                    type='DifferenceAggregator',
+                    in_channels=2048,
+                    out_channels=1024,
+                    with_fc=True)
+            ],
+            init_cfg=[
+                dict(
+                    type='Normal',
+                    layer=['Conv1d', 'Conv2d', 'Linear'],
+                    mean=0.0,
+                    std=0.001),
+                dict(type='Normal', layer=['BatchNorm1d'], mean=1.0, std=0.02)
             ])),
     train_cfg=dict(
         rpn=dict(
@@ -316,19 +378,16 @@ model = dict(
         rcnn=dict(
             score_thr=0.05,
             nms=dict(type='nms', iou_threshold=0.3),
-            max_per_img=100)),
-    frozen_parameters=[
-        'backbone', 'shared_head', 'rpn_head', 'aggregation_layer'
-    ])
-checkpoint_config = dict(interval=1000)
+            max_per_img=100)))
+checkpoint_config = dict(interval=6000)
 log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
 custom_hooks = [dict(type='NumClassCheckHook')]
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = 'work_dirs/meta-rcnn_r50_c4_8xb4_coco_base-training/latest.pth'
+load_from = None
 resume_from = None
 workflow = [('train', 1)]
 use_infinite_sampler = True
 seed = 42
-work_dir = './work_dirs/meta-rcnn_r50_c4_8xb4_coco_10shot-fine-tuning'
+work_dir = './work_dirs/fsdetview_r101_c4_8xb4_voc-split1_base-training'
 gpu_ids = [0]

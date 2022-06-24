@@ -1,7 +1,7 @@
 num_support_ways = 2
 num_support_shots = 10
 dataset_type = 'FewShotVOCDataset'
-data_root = '/workspace/datasets/detection/voc'
+data_root = '/workspace/datasets/detection/voc/'
 img_prefix = '/workspace/datasets/detection/voc/VOCdevkit/'
 split_prefix = 'few_shot_ann/'
 train_ann_cfg = [
@@ -23,8 +23,8 @@ val_ann_cfg = [
         '/workspace/datasets/detection/voc/VOCdevkit/VOC2007/ImageSets/Main/test.txt'
     )
 ]
-evaluation = dict(interval=100, metric='mAP')
-max_iters = 100
+evaluation = dict(interval=6000, metric='mAP')
+max_iters = 120000
 num_novel_shots = 10
 fine_tuning_setting = '10SHOT'
 fine_tuning_dataset_type = 'FewShotVOCDefaultDataset'

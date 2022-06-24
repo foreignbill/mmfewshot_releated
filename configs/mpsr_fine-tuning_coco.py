@@ -1,45 +1,63 @@
 img_norm_cfg = dict(
-    mean=[103.53, 116.28, 123.675], std=[1.0, 1.0, 1.0], to_rgb=False)
+    mean=[102.9801, 115.9465, 122.7717], std=[1.0, 1.0, 1.0], to_rgb=False)
+multi_scales = (32, 64, 128, 256, 512, 800)
 train_multi_pipelines = dict(
-    query=[
+    main=[
         dict(type='LoadImageFromFile'),
         dict(type='LoadAnnotations', with_bbox=True),
-        dict(type='Resize', img_scale=(1000, 600), keep_ratio=True),
+        dict(
+            type='Resize',
+            img_scale=[(1333, 800)],
+            keep_ratio=True,
+            multiscale_mode='value'),
         dict(type='RandomFlip', flip_ratio=0.5),
         dict(
             type='Normalize',
-            mean=[103.53, 116.28, 123.675],
+            mean=[102.9801, 115.9465, 122.7717],
             std=[1.0, 1.0, 1.0],
             to_rgb=False),
         dict(type='Pad', size_divisor=32),
         dict(type='DefaultFormatBundle'),
         dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
     ],
-    support=[
+    auxiliary=[
         dict(type='LoadImageFromFile'),
         dict(type='LoadAnnotations', with_bbox=True),
+        dict(type='CropInstance', context_ratio=0.14285714285714285),
         dict(
-            type='Normalize',
-            mean=[103.53, 116.28, 123.675],
+            type='ResizeToMultiScale',
+            multi_scales=[(36.57142857142857, 36.57142857142857),
+                          (73.14285714285714, 73.14285714285714),
+                          (146.28571428571428, 146.28571428571428),
+                          (292.57142857142856, 292.57142857142856),
+                          (585.1428571428571, 585.1428571428571),
+                          (914.2857142857143, 914.2857142857143)]),
+        dict(
+            type='MultiImageRandomCrop',
+            multi_crop_sizes=[(32, 32), (64, 64), (128, 128), (256, 256),
+                              (512, 512), (800, 800)]),
+        dict(
+            type='MultiImageNormalize',
+            mean=[102.9801, 115.9465, 122.7717],
             std=[1.0, 1.0, 1.0],
             to_rgb=False),
-        dict(type='GenerateMask', target_size=(224, 224)),
-        dict(type='RandomFlip', flip_ratio=0.0),
-        dict(type='DefaultFormatBundle'),
-        dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+        dict(type='MultiImageRandomFlip', flip_ratio=0.5),
+        dict(type='MultiImagePad', size_divisor=32),
+        dict(type='MultiImageFormatBundle'),
+        dict(type='MultiImageCollect', keys=['img', 'gt_labels'])
     ])
 test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
         type='MultiScaleFlipAug',
-        img_scale=(1000, 600),
+        img_scale=(1333, 800),
         flip=False,
         transforms=[
             dict(type='Resize', keep_ratio=True),
             dict(type='RandomFlip'),
             dict(
                 type='Normalize',
-                mean=[103.53, 116.28, 123.675],
+                mean=[102.9801, 115.9465, 122.7717],
                 std=[1.0, 1.0, 1.0],
                 to_rgb=False),
             dict(type='ImageToTensor', keys=['img']),
@@ -48,29 +66,31 @@ test_pipeline = [
 ]
 data_root = 'data/coco/'
 data = dict(
-    samples_per_gpu=4,
+    samples_per_gpu=2,
     workers_per_gpu=2,
+    auxiliary_samples_per_gpu=2,
+    auxiliary_workers_per_gpu=2,
     train=dict(
-        type='NWayKShotDataset',
-        num_support_ways=80,
-        num_support_shots=1,
-        one_support_shot_per_image=False,
-        num_used_support_shots=10,
+        type='TwoBranchDataset',
         save_dataset=True,
+        reweight_dataset=False,
         dataset=dict(
             type='FewShotCocoDefaultDataset',
-            ann_cfg=[dict(method='FSDetView', setting='10SHOT')],
+            ann_cfg=[dict(method='MPSR', setting='10SHOT')],
             img_prefix='data/coco/',
             multi_pipelines=dict(
-                query=[
+                main=[
                     dict(type='LoadImageFromFile'),
                     dict(type='LoadAnnotations', with_bbox=True),
                     dict(
-                        type='Resize', img_scale=(1000, 600), keep_ratio=True),
+                        type='Resize',
+                        img_scale=[(1333, 800)],
+                        keep_ratio=True,
+                        multiscale_mode='value'),
                     dict(type='RandomFlip', flip_ratio=0.5),
                     dict(
                         type='Normalize',
-                        mean=[103.53, 116.28, 123.675],
+                        mean=[102.9801, 115.9465, 122.7717],
                         std=[1.0, 1.0, 1.0],
                         to_rgb=False),
                     dict(type='Pad', size_divisor=32),
@@ -78,25 +98,44 @@ data = dict(
                     dict(
                         type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
                 ],
-                support=[
+                auxiliary=[
                     dict(type='LoadImageFromFile'),
                     dict(type='LoadAnnotations', with_bbox=True),
                     dict(
-                        type='Normalize',
-                        mean=[103.53, 116.28, 123.675],
+                        type='CropInstance',
+                        context_ratio=0.14285714285714285),
+                    dict(
+                        type='ResizeToMultiScale',
+                        multi_scales=[(36.57142857142857, 36.57142857142857),
+                                      (73.14285714285714, 73.14285714285714),
+                                      (146.28571428571428, 146.28571428571428),
+                                      (292.57142857142856, 292.57142857142856),
+                                      (585.1428571428571, 585.1428571428571),
+                                      (914.2857142857143, 914.2857142857143)]),
+                    dict(
+                        type='MultiImageRandomCrop',
+                        multi_crop_sizes=[(32, 32), (64, 64), (128, 128),
+                                          (256, 256), (512, 512), (800, 800)]),
+                    dict(
+                        type='MultiImageNormalize',
+                        mean=[102.9801, 115.9465, 122.7717],
                         std=[1.0, 1.0, 1.0],
                         to_rgb=False),
-                    dict(type='GenerateMask', target_size=(224, 224)),
-                    dict(type='RandomFlip', flip_ratio=0.0),
-                    dict(type='DefaultFormatBundle'),
-                    dict(
-                        type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+                    dict(type='MultiImageRandomFlip', flip_ratio=0.5),
+                    dict(type='MultiImagePad', size_divisor=32),
+                    dict(type='MultiImageFormatBundle'),
+                    dict(type='MultiImageCollect', keys=['img', 'gt_labels'])
                 ]),
             classes='ALL_CLASSES',
             instance_wise=False,
-            dataset_name='query_support_dataset',
+            dataset_name='main_dataset',
             num_novel_shots=10,
-            num_base_shots=10)),
+            num_base_shots=10),
+        auxiliary_dataset=dict(
+            copy_from_main_dataset=True,
+            instance_wise=True,
+            min_bbox_size=8,
+            dataset_name='auxiliary_dataset')),
     val=dict(
         type='FewShotCocoDataset',
         ann_cfg=[
@@ -109,14 +148,14 @@ data = dict(
             dict(type='LoadImageFromFile'),
             dict(
                 type='MultiScaleFlipAug',
-                img_scale=(1000, 600),
+                img_scale=(1333, 800),
                 flip=False,
                 transforms=[
                     dict(type='Resize', keep_ratio=True),
                     dict(type='RandomFlip'),
                     dict(
                         type='Normalize',
-                        mean=[103.53, 116.28, 123.675],
+                        mean=[102.9801, 115.9465, 122.7717],
                         std=[1.0, 1.0, 1.0],
                         to_rgb=False),
                     dict(type='ImageToTensor', keys=['img']),
@@ -136,14 +175,14 @@ data = dict(
             dict(type='LoadImageFromFile'),
             dict(
                 type='MultiScaleFlipAug',
-                img_scale=(1000, 600),
+                img_scale=(1333, 800),
                 flip=False,
                 transforms=[
                     dict(type='Resize', keep_ratio=True),
                     dict(type='RandomFlip'),
                     dict(
                         type='Normalize',
-                        mean=[103.53, 116.28, 123.675],
+                        mean=[102.9801, 115.9465, 122.7717],
                         std=[1.0, 1.0, 1.0],
                         to_rgb=False),
                     dict(type='ImageToTensor', keys=['img']),
@@ -151,137 +190,93 @@ data = dict(
                 ])
         ],
         test_mode=True,
-        classes='ALL_CLASSES'),
-    model_init=dict(
-        copy_from_train_dataset=True,
-        samples_per_gpu=16,
-        workers_per_gpu=1,
-        type='FewShotCocoDataset',
-        ann_cfg=None,
-        img_prefix='data/coco/',
-        pipeline=[
-            dict(type='LoadImageFromFile'),
-            dict(type='LoadAnnotations', with_bbox=True),
-            dict(
-                type='Normalize',
-                mean=[103.53, 116.28, 123.675],
-                std=[1.0, 1.0, 1.0],
-                to_rgb=False),
-            dict(type='GenerateMask', target_size=(224, 224)),
-            dict(type='RandomFlip', flip_ratio=0.0),
-            dict(type='DefaultFormatBundle'),
-            dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
-        ],
-        instance_wise=True,
-        classes='ALL_CLASSES',
-        dataset_name='model_init_dataset',
-        num_novel_shots=10,
-        num_base_shots=10))
+        classes='ALL_CLASSES'))
 evaluation = dict(
-    interval=1000,
+    interval=4000,
     metric='bbox',
     classwise=True,
     class_splits=['BASE_CLASSES', 'NOVEL_CLASSES'])
-optimizer = dict(type='SGD', lr=0.001, momentum=0.9, weight_decay=0.0001)
+optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=None)
 lr_config = dict(
     policy='step',
-    warmup=None,
+    warmup='linear',
     warmup_iters=500,
-    warmup_ratio=0.001,
-    step=[5000])
-runner = dict(type='IterBasedRunner', max_iters=5000)
-norm_cfg = dict(type='BN', requires_grad=False)
-pretrained = 'open-mmlab://detectron2/resnet50_caffe'
+    warmup_ratio=0.3333333333333333,
+    step=[2800, 3500])
+runner = dict(type='IterBasedRunner', max_iters=4000)
 model = dict(
-    type='FSDetView',
-    pretrained='open-mmlab://detectron2/resnet50_caffe',
+    type='MPSR',
+    pretrained='open-mmlab://detectron2/resnet101_caffe',
     backbone=dict(
-        type='ResNetWithMetaConv',
-        depth=50,
-        num_stages=3,
-        strides=(1, 2, 2),
-        dilations=(1, 1, 1),
-        out_indices=(2, ),
-        frozen_stages=2,
+        type='ResNet',
+        depth=101,
+        num_stages=4,
+        out_indices=(0, 1, 2, 3),
+        frozen_stages=1,
         norm_cfg=dict(type='BN', requires_grad=False),
         norm_eval=True,
         style='caffe'),
+    neck=dict(
+        type='FPN',
+        in_channels=[256, 512, 1024, 2048],
+        out_channels=256,
+        num_outs=5,
+        init_cfg=[
+            dict(
+                type='Caffe2Xavier',
+                override=dict(type='Caffe2Xavier', name='lateral_convs')),
+            dict(
+                type='Caffe2Xavier',
+                override=dict(type='Caffe2Xavier', name='fpn_convs'))
+        ]),
     rpn_head=dict(
-        type='RPNHead',
-        in_channels=1024,
-        feat_channels=512,
+        type='TwoBranchRPNHead',
+        in_channels=256,
+        feat_channels=256,
         anchor_generator=dict(
             type='AnchorGenerator',
-            scales=[2, 4, 8, 16, 32],
+            scales=[8],
             ratios=[0.5, 1.0, 2.0],
-            scale_major=False,
-            strides=[16]),
+            strides=[4, 8, 16, 32, 64]),
         bbox_coder=dict(
             type='DeltaXYWHBBoxCoder',
             target_means=[0.0, 0.0, 0.0, 0.0],
             target_stds=[1.0, 1.0, 1.0, 1.0]),
         loss_cls=dict(
-            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
-        loss_bbox=dict(type='L1Loss', loss_weight=1.0)),
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
+        loss_bbox=dict(
+            type='SmoothL1Loss', loss_weight=1.0, beta=0.1111111111111111),
+        mid_channels=64),
     roi_head=dict(
-        type='FSDetViewRoIHead',
-        shared_head=dict(
-            type='MetaRCNNResLayer',
-            pretrained='open-mmlab://detectron2/resnet50_caffe',
-            depth=50,
-            stage=3,
-            stride=2,
-            dilation=1,
-            style='caffe',
-            norm_cfg=dict(type='BN', requires_grad=False),
-            norm_eval=True),
+        type='TwoBranchRoIHead',
         bbox_roi_extractor=dict(
             type='SingleRoIExtractor',
-            roi_layer=dict(type='RoIAlign', output_size=14, sampling_ratio=0),
-            out_channels=1024,
-            featmap_strides=[16]),
+            roi_layer=dict(type='RoIAlign', output_size=8, sampling_ratio=2),
+            out_channels=256,
+            featmap_strides=[4, 8, 16, 32]),
         bbox_head=dict(
-            type='MetaBBoxHead',
-            with_avg_pool=False,
-            roi_feat_size=1,
-            in_channels=4096,
+            type='TwoBranchBBoxHead',
+            in_channels=256,
+            fc_out_channels=1024,
+            roi_feat_size=8,
             num_classes=80,
             bbox_coder=dict(
                 type='DeltaXYWHBBoxCoder',
                 target_means=[0.0, 0.0, 0.0, 0.0],
                 target_stds=[0.1, 0.1, 0.2, 0.2]),
-            reg_class_agnostic=False,
+            reg_class_agnostic=True,
             loss_cls=dict(
                 type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
-            loss_bbox=dict(type='SmoothL1Loss', loss_weight=1.0),
-            num_meta_classes=80,
-            meta_cls_in_channels=2048,
-            with_meta_cls_loss=True,
-            loss_meta=dict(
-                type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0)),
-        aggregation_layer=dict(
-            type='AggregationLayer',
-            aggregator_cfgs=[
-                dict(
-                    type='DepthWiseCorrelationAggregator',
-                    in_channels=2048,
-                    out_channels=1024,
-                    with_fc=True),
-                dict(
-                    type='DifferenceAggregator',
-                    in_channels=2048,
-                    out_channels=1024,
-                    with_fc=True)
-            ],
+            loss_bbox=dict(type='SmoothL1Loss', loss_weight=1.0, beta=1.0),
             init_cfg=[
                 dict(
                     type='Normal',
-                    layer=['Conv1d', 'Conv2d', 'Linear'],
-                    mean=0.0,
-                    std=0.001),
-                dict(type='Normal', layer=['BatchNorm1d'], mean=1.0, std=0.02)
-            ])),
+                    override=dict(type='Normal', name='fc_cls', std=0.001))
+            ],
+            num_cls_fcs=2,
+            num_reg_fcs=2,
+            auxiliary_loss_weight=0.1)),
     train_cfg=dict(
         rpn=dict(
             assigner=dict(
@@ -301,10 +296,11 @@ model = dict(
             pos_weight=-1,
             debug=False),
         rpn_proposal=dict(
-            nms_pre=12000,
-            max_per_img=2000,
-            nms=dict(type='nms', iou_threshold=0.7),
-            min_bbox_size=0),
+            nms_pre=2000,
+            max_per_img=None,
+            nms=dict(type='nms', iou_threshold=0.7, offset=1),
+            min_bbox_size=0,
+            max_per_batch=2000),
         rcnn=dict(
             assigner=dict(
                 type='MaxIoUAssigner',
@@ -315,7 +311,7 @@ model = dict(
                 ignore_iof_thr=-1),
             sampler=dict(
                 type='RandomSampler',
-                num=128,
+                num=512,
                 pos_fraction=0.25,
                 neg_pos_ub=-1,
                 add_gt_as_proposals=True),
@@ -323,26 +319,25 @@ model = dict(
             debug=False)),
     test_cfg=dict(
         rpn=dict(
-            nms_pre=6000,
-            max_per_img=300,
-            nms=dict(type='nms', iou_threshold=0.7),
+            nms_pre=1000,
+            max_per_img=1000,
+            nms=dict(type='nms', iou_threshold=0.7, offset=1),
             min_bbox_size=0),
         rcnn=dict(
             score_thr=0.05,
-            nms=dict(type='nms', iou_threshold=0.3),
+            nms=dict(type='nms', iou_threshold=0.5, offset=1),
             max_per_img=100)),
-    frozen_parameters=[
-        'backbone', 'shared_head', 'rpn_head', 'aggregation_layer'
-    ])
-checkpoint_config = dict(interval=1000)
+    rpn_select_levels=[0, 1, 2, 3, 4, 4],
+    roi_select_levels=[0, 0, 0, 1, 2, 3])
+checkpoint_config = dict(interval=4000)
 log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
 custom_hooks = [dict(type='NumClassCheckHook')]
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = 'work_dirs/fsdetview_r50_c4_8xb4_coco_base-training/latest.pth'
+load_from = 'work_dirs/mpsr_r101_fpn_2xb2_coco_base-training/latest.pth'
 resume_from = None
 workflow = [('train', 1)]
 use_infinite_sampler = True
 seed = 42
-work_dir = './work_dirs/fsdetview_r50_c4_8xb4_coco_10shot-fine-tuning'
+work_dir = './work_dirs/mpsr_r101_fpn_2xb2_coco_10shot-fine-tuning'
 gpu_ids = [0]

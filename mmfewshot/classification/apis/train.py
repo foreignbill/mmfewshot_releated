@@ -74,6 +74,8 @@ def train_model(model: Union[MMDataParallel, MMDistributedDataParallel],
     # TODO: here only use InfiniteEpochBasedRunner
     if cfg.use_infinite_sampler and cfg.runner['type'] == 'EpochBasedRunner':
         cfg.runner['type'] = 'InfiniteEpochBasedRunner'
+    if cfg.runner['type'] == 'IterBasedRunner':
+        cfg.runner['type'] = 'IterBasedRunnerWithLog'
     runner = build_runner(
         cfg.runner,
         default_args=dict(

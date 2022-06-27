@@ -92,7 +92,7 @@ log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
 checkpoint_config = dict(interval=4000)
 
 #### learning config
-evaluation = dict(by_epoch=False, metric='accuracy', interval=2000)
+evaluation = dict(by_epoch=False, metric='accuracy', interval=50)
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 load_from = None

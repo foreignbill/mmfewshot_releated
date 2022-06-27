@@ -76,6 +76,8 @@ def train_model(model: Union[MMDataParallel, MMDistributedDataParallel],
         cfg.runner['type'] = 'InfiniteEpochBasedRunner'
     if cfg.runner['type'] == 'IterBasedRunner':
         cfg.runner['type'] = 'IterBasedRunnerWithLog'
+    if cfg.runner['type'] == 'EpochBasedRunner':
+        cfg.runner['type'] = 'EpochBasedRunnerWithLog'
     runner = build_runner(
         cfg.runner,
         default_args=dict(

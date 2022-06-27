@@ -111,6 +111,11 @@ class InfiniteEpochBasedRunner(EpochBasedRunner):
                 if mode == 'train' and self.epoch >= self._max_epochs:
                     break
                 epoch_runner(data_loaders[i], **kwargs)
+            if self.epoch % 2 == 0:
+                log_vars = self.outputs['log_vars']
+                for log_var in log_vars:
+                    self.tensor_writer.add_scalar(log_var, log_vars[log_var], global_step=self.epoch)
+                self.tensor_writer.flush()
 
         time.sleep(1)  # wait for some hooks like loggers to finish
         self.call_hook('after_run')

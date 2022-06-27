@@ -18,6 +18,6 @@ tasks:
       backbone:
       max_iters:
   test:
-    entrypoints: "python ./tools/classification/test.py ./configs/config.py /export/best_accuracy_mean.pth"
+    entrypoints: "python ./tools/classification/test.py ./configs/config.py /export/latest.pth --show_task_results"
     args:
       metrics:

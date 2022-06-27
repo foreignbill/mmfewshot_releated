@@ -16,5 +16,5 @@ backbone = 'Conv4'
 in_channels = 1600
 query_batch_size = 75
 support_batch_size = 5
-max_iters = 100000
+max_iters = 4000
 gpu_resources = 2048

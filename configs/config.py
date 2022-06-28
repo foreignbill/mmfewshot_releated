@@ -116,6 +116,6 @@ model = dict(
     head=dict(type='MatchingHead'))
 
 # work config
-work_dir = './work_dir'
-tensor_dir = './work_dir/tensorboard_log'
+work_dir = '/export'
+tensor_dir = '/tensorboard_log'
 gpu_ids = [0]

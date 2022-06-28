@@ -126,6 +126,6 @@ model = dict(
         temperature=5.0))
 
 # work config
-work_dir = './work_dir'
-tensor_dir = './work_dir/tensorboard_log'
+work_dir = '/export'
+tensor_dir = '/tensorboard_log'
 gpu_ids = [0]

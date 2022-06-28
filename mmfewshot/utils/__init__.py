@@ -5,10 +5,10 @@ from .infinite_sampler import (DistributedInfiniteGroupSampler,
                                InfiniteGroupSampler, InfiniteSampler)
 from .local_seed import local_numpy_seed
 from .logger import get_root_logger
-from .runner import InfiniteEpochBasedRunner
+from .runner import InfiniteEpochBasedRunner, IterBasedRunnerWithLog
 
 __all__ = [
-    'multi_pipeline_collate_fn', 'local_numpy_seed',
+    'multi_pipeline_collate_fn', 'local_numpy_seed', 'IterBasedRunnerWithLog',
     'InfiniteEpochBasedRunner', 'InfiniteSampler', 'InfiniteGroupSampler',
     'DistributedInfiniteSampler', 'DistributedInfiniteGroupSampler',
     'get_root_logger'

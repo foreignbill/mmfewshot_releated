@@ -32,7 +32,7 @@ class InfiniteEpochBasedRunner(EpochBasedRunner):
                  max_epochs=None):
         super().__init__(model, batch_processor, optimizer, work_dir, logger, meta, max_iters, max_epochs)
         if work_dir is not None and work_dir == '/export':
-            self.tensor_writer = SummaryWriter('./tensorboard_log/')
+            self.tensor_writer = SummaryWriter('/tensorboard_log/')
         else:
             self.tensor_writer = SummaryWriter(f'{work_dir}/tensorboard_log')
 
@@ -164,7 +164,7 @@ class EpochBasedRunnerWithLog(EpochBasedRunner):
                  max_epochs=None):
         super().__init__(model, batch_processor, optimizer, work_dir, logger, meta, max_iters, max_epochs)
         if work_dir is not None and work_dir == '/export':
-            self.tensor_writer = SummaryWriter('./tensorboard_log/')
+            self.tensor_writer = SummaryWriter('/tensorboard_log/')
         else:
             self.tensor_writer = SummaryWriter(f'{work_dir}/tensorboard_log')
         
@@ -247,7 +247,7 @@ class IterBasedRunnerWithLog(IterBasedRunner):
                  max_epochs=None):
         super().__init__(model, batch_processor, optimizer, work_dir, logger, meta, max_iters, max_epochs)
         if work_dir is not None and work_dir == '/export':
-            self.tensor_writer = SummaryWriter('./tensorboard_log/')
+            self.tensor_writer = SummaryWriter('/tensorboard_log/')
         else:
             self.tensor_writer = SummaryWriter(f'{work_dir}/tensorboard_log')
     

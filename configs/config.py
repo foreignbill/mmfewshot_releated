@@ -114,6 +114,6 @@ model = dict(
     meta_test_head=dict(type='CosineDistanceHead', num_classes={{_base_.num_ways}}, in_channels={{_base_.in_channels}}))
 
 # work config
-work_dir = './work_dir'
-tensor_dir = './work_dir/tensorboard_log'
+work_dir = '/export'
+tensor_dir = '/tensorboard_log'
 gpu_ids = [0]

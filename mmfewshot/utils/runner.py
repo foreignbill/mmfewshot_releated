@@ -1,10 +1,11 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-from cmath import log
 import time
 import warnings
 
 import mmcv
-from mmcv.runner import EpochBasedRunner
+from mmcv.runner import EpochBasedRunner, IterBasedRunner
+from mmcv.runner.utils import get_host_info
+from mmcv.runner import IterLoader
 from mmcv.runner.builder import RUNNERS
 from torch.utils.data import DataLoader
 from tensorboardX import SummaryWriter
@@ -31,7 +32,7 @@ class InfiniteEpochBasedRunner(EpochBasedRunner):
                  max_epochs=None):
         super().__init__(model, batch_processor, optimizer, work_dir, logger, meta, max_iters, max_epochs)
         if work_dir is not None and work_dir == '/export':
-            self.tensor_writer = SummaryWriter('./tensorboard_log/')
+            self.tensor_writer = SummaryWriter('/tensorboard_log/')
         else:
             self.tensor_writer = SummaryWriter(f'{work_dir}/tensorboard_log')
 
@@ -148,3 +149,163 @@ class InfiniteEpochBasedRunner(EpochBasedRunner):
 
         self.call_hook('after_train_epoch')
         self._epoch += 1
+
+
+@RUNNERS.register_module()
+class EpochBasedRunnerWithLog(EpochBasedRunner):
+    def __init__(self,
+                 model,
+                 batch_processor=None,
+                 optimizer=None,
+                 work_dir=None,
+                 logger=None,
+                 meta=None,
+                 max_iters=None,
+                 max_epochs=None):
+        super().__init__(model, batch_processor, optimizer, work_dir, logger, meta, max_iters, max_epochs)
+        if work_dir is not None and work_dir == '/export':
+            self.tensor_writer = SummaryWriter('/tensorboard_log/')
+        else:
+            self.tensor_writer = SummaryWriter(f'{work_dir}/tensorboard_log')
+        
+    def run(self, data_loaders, workflow, max_epochs=None, **kwargs):
+        """Start running.
+
+        Args:
+            data_loaders (list[:obj:`DataLoader`]): Dataloaders for training
+                and validation.
+            workflow (list[tuple]): A list of (phase, epochs) to specify the
+                running order and epochs. E.g, [('train', 2), ('val', 1)] means
+                running 2 epochs for training and 1 epoch for validation,
+                iteratively.
+        """
+        assert isinstance(data_loaders, list)
+        assert mmcv.is_list_of(workflow, tuple)
+        assert len(data_loaders) == len(workflow)
+        if max_epochs is not None:
+            warnings.warn(
+                'setting max_epochs in run is deprecated, '
+                'please set max_epochs in runner_config', DeprecationWarning)
+            self._max_epochs = max_epochs
+
+        assert self._max_epochs is not None, (
+            'max_epochs must be specified during instantiation')
+
+        for i, flow in enumerate(workflow):
+            mode, epochs = flow
+            if mode == 'train':
+                self._max_iters = self._max_epochs * len(data_loaders[i])
+                break
+
+        work_dir = self.work_dir if self.work_dir is not None else 'NONE'
+        self.logger.info('Start running, host: %s, work_dir: %s',
+                         get_host_info(), work_dir)
+        self.logger.info('Hooks will be executed in the following order:\n%s',
+                         self.get_hook_info())
+        self.logger.info('workflow: %s, max: %d epochs', workflow,
+                         self._max_epochs)
+        self.call_hook('before_run')
+
+        while self.epoch < self._max_epochs:
+            for i, flow in enumerate(workflow):
+                mode, epochs = flow
+                if isinstance(mode, str):  # self.train()
+                    if not hasattr(self, mode):
+                        raise ValueError(
+                            f'runner has no method named "{mode}" to run an '
+                            'epoch')
+                    epoch_runner = getattr(self, mode)
+                else:
+                    raise TypeError(
+                        'mode in workflow must be a str, but got {}'.format(
+                            type(mode)))
+
+                for _ in range(epochs):
+                    if mode == 'train' and self.epoch >= self._max_epochs:
+                        break
+                    epoch_runner(data_loaders[i], **kwargs)
+            if self.epoch % 2 == 0:
+                log_vars = self.outputs['log_vars']
+                for log_var in log_vars:
+                    self.tensor_writer.add_scalar(log_var, log_vars[log_var], global_step=self.epoch)
+                self.tensor_writer.flush()
+
+        time.sleep(1)  # wait for some hooks like loggers to finish
+        self.call_hook('after_run')
+
+@RUNNERS.register_module()
+class IterBasedRunnerWithLog(IterBasedRunner):
+    
+    def __init__(self,
+                 model,
+                 batch_processor=None,
+                 optimizer=None,
+                 work_dir=None,
+                 logger=None,
+                 meta=None,
+                 max_iters=None,
+                 max_epochs=None):
+        super().__init__(model, batch_processor, optimizer, work_dir, logger, meta, max_iters, max_epochs)
+        if work_dir is not None and work_dir == '/export':
+            self.tensor_writer = SummaryWriter('/tensorboard_log/')
+        else:
+            self.tensor_writer = SummaryWriter(f'{work_dir}/tensorboard_log')
+    
+    def run(self, data_loaders, workflow, max_iters=None, **kwargs):
+        """Start running.
+
+        Args:
+            data_loaders (list[:obj:`DataLoader`]): Dataloaders for training
+                and validation.
+            workflow (list[tuple]): A list of (phase, iters) to specify the
+                running order and iterations. E.g, [('train', 10000),
+                ('val', 1000)] means running 10000 iterations for training and
+                1000 iterations for validation, iteratively.
+        """
+        assert isinstance(data_loaders, list)
+        assert mmcv.is_list_of(workflow, tuple)
+        assert len(data_loaders) == len(workflow)
+        if max_iters is not None:
+            warnings.warn(
+                'setting max_iters in run is deprecated, '
+                'please set max_iters in runner_config', DeprecationWarning)
+            self._max_iters = max_iters
+        assert self._max_iters is not None, (
+            'max_iters must be specified during instantiation')
+
+        work_dir = self.work_dir if self.work_dir is not None else 'NONE'
+        self.logger.info('Start running, host: %s, work_dir: %s',
+                         get_host_info(), work_dir)
+        self.logger.info('Hooks will be executed in the following order:\n%s',
+                         self.get_hook_info())
+        self.logger.info('workflow: %s, max: %d iters', workflow,
+                         self._max_iters)
+        self.call_hook('before_run')
+
+        iter_loaders = [IterLoader(x) for x in data_loaders]
+
+        self.call_hook('before_epoch')
+
+        while self.iter < self._max_iters:
+            self.tensor_writer.add_scalar('progress', self.iter / self._max_iters, global_step=self.iter)
+            for i, flow in enumerate(workflow):
+                self._inner_iter = 0
+                mode, iters = flow
+                if not isinstance(mode, str) or not hasattr(self, mode):
+                    raise ValueError(
+                        'runner has no method named "{}" to run a workflow'.
+                        format(mode))
+                iter_runner = getattr(self, mode)
+                for _ in range(iters):
+                    if mode == 'train' and self.iter >= self._max_iters:
+                        break
+                    iter_runner(iter_loaders[i], **kwargs)
+            if self.iter % 200 == 0:
+                log_vars = self.outputs['log_vars']
+                for log_var in log_vars:
+                    self.tensor_writer.add_scalar(log_var, log_vars[log_var], global_step=self.iter)
+                    self.tensor_writer.flush()
+
+        time.sleep(1)  # wait for some hooks like loggers to finish
+        self.call_hook('after_epoch')
+        self.call_hook('after_run')

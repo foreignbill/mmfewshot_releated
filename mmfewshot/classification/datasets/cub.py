@@ -37,7 +37,7 @@ class CUBDataset(BaseFewShotDataset):
                  subset: Literal['train', 'test', 'val'] = 'train',
                  *args,
                  **kwargs) -> None:
-        dataset_file = osp.join(kwargs['data_root'], 'data_config.py')
+        dataset_file = osp.join(kwargs['data_prefix'], 'data_config.py')
         dataset_config = mmcv.Config.fromfile(dataset_file)
         self.ALL_CLASSES = dataset_config.ALL_CLASSES
         

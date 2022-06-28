@@ -116,6 +116,6 @@ model = dict(
     head=dict(type='RelationHead', in_channels=64, feature_size=(19, 19)))
 
 # work config
-work_dir = './work_dir'
-tensor_dir = './work_dir/tensorboard_log'
+work_dir = '/export'
+tensor_dir = '/tensorboard_log'
 gpu_ids = [0]

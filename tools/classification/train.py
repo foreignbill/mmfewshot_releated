@@ -84,9 +84,10 @@ def parse_args():
     #### meta test config
     parser.add_argument('--episodes_seed', type=int, default=0, help='seed for generating meta test episodes')
     #### model
-    parser.add_argument('--backbone', type=str, default='Conv4NoPool', help='which backbone to be used, choose between Conv4NoPool and ResNet12')
+    parser.add_argument('--backbone', type=str, default='Conv4', help='which backbone to be used, choose between Conv4 and ResNet12')
     #### runner
-    parser.add_argument('--max_iters', type=int, default=100000, help='max iterations of runner')
+    parser.add_argument('--max_epoch', type=int, default=200, help='max epoch of runner')
+    parser.add_argument('--max_iters', type=int, default=100000, help='max epoch of iterations')
     ################################################################################################################
     args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
@@ -106,11 +107,9 @@ def main():
     predefined_cfg.num_ways = args.num_ways
     predefined_cfg.num_shots = args.num_shots
     predefined_cfg.num_queries = args.num_queries
-    predefined_cfg.num_train_queries = args.num_queries + 1
     predefined_cfg.num_val_episodes = args.num_val_episodes
     predefined_cfg.num_test_episodes = args.num_test_episodes
     predefined_cfg.query_batch_size = predefined_cfg.num_ways * predefined_cfg.num_queries
-    predefined_cfg.support_batch_size = predefined_cfg.num_ways * predefined_cfg.num_shots
     #### dataset config
     dataset_path = args.dataset_prefix
     data_config = Config.fromfile(osp.join(dataset_path, 'data_config.py'))
@@ -135,6 +134,7 @@ def main():
         # in ResNet12 model, out_channels was fitted to 640
         predefined_cfg.in_channels = 640
     #### runner
+    predefined_cfg.max_epoch = args.max_epoch
     predefined_cfg.max_iters = args.max_iters
 
     #### generate new predefined config file

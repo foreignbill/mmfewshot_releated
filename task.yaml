@@ -15,6 +15,7 @@ tasks:
       seed:
   fine_tuning:
     entrypoints: "python ./tools/detection/train.py ./configs/fine-tuning_config.py /export/base-training/latest.pth"
+    args:
       num_support_ways:
       num_support_shots:
       num_novel_shots:
@@ -22,3 +23,4 @@ tasks:
       seed:
   visualize:
     entrypoints: "python ./tools/detection/misc/visualize_saved_dataset.py --src /export/fine-tuning/saved_data.json --out /export/visualize/"
+    args:

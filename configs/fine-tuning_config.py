@@ -117,7 +117,7 @@ lr_config = dict(
     step=[{{_base_.max_iters}}])
 runner = dict(type='IterBasedRunner', max_iters={{_base_.max_iters}})
 norm_cfg = dict(type='BN', requires_grad=False)
-pretrained = 'pretrained/detectron2_resnet50_caffe.pth'
+pretrained = 'pretrained/detectron2_resnet101_caffe.pth'
 model = dict(
     type='TFA',
     pretrained=pretrained,

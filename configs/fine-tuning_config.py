@@ -347,7 +347,7 @@ log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
 custom_hooks = [dict(type='NumClassCheckHook')]
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = '/export/best.pth'
+load_from = '/export/base-training/latest.pth'
 resume_from = None
 workflow = [('train', 1)]
 use_infinite_sampler = True

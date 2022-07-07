@@ -46,8 +46,8 @@ test_pipeline = [
         ])
 ]
 data_root = 'data/coco/'
-data = dict(
-    samples_per_gpu=4,
+coco_data = dict(
+    samples_per_gpu=2,
     workers_per_gpu=2,
     train=dict(
         type='NWayKShotDataset',
@@ -189,7 +189,7 @@ norm_cfg = dict(type='BN', requires_grad=False)
 pretrained = 'open-mmlab://detectron2/resnet50_caffe'
 model = dict(
     type='FSDetView',
-    pretrained='open-mmlab://detectron2/resnet50_caffe',
+    pretrained=pretrained,
     backbone=dict(
         type='ResNetWithMetaConv',
         depth=50,

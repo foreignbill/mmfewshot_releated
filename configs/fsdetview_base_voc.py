@@ -47,171 +47,58 @@ test_pipeline = [
 ]
 data_root = 'data/VOCdevkit/'
 data = dict(
-    samples_per_gpu=4,
+    samples_per_gpu=2,
     workers_per_gpu=2,
     train=dict(
         type='NWayKShotDataset',
-        num_support_ways=15,
-        num_support_shots=1,
+        num_support_ways={{_base_.num_support_ways}},
+        num_support_shots={{_base_.num_support_shots}},
         one_support_shot_per_image=True,
         num_used_support_shots=200,
         save_dataset=False,
         dataset=dict(
-            type='FewShotVOCDataset',
-            ann_cfg=[
-                dict(
-                    type='ann_file',
-                    ann_file=
-                    'data/VOCdevkit/VOC2007/ImageSets/Main/trainval.txt'),
-                dict(
-                    type='ann_file',
-                    ann_file=
-                    'data/VOCdevkit/VOC2012/ImageSets/Main/trainval.txt')
-            ],
-            img_prefix='data/VOCdevkit/',
-            multi_pipelines=dict(
-                query=[
-                    dict(type='LoadImageFromFile'),
-                    dict(type='LoadAnnotations', with_bbox=True),
-                    dict(
-                        type='Resize', img_scale=(1000, 600), keep_ratio=True),
-                    dict(type='RandomFlip', flip_ratio=0.5),
-                    dict(
-                        type='Normalize',
-                        mean=[103.53, 116.28, 123.675],
-                        std=[1.0, 1.0, 1.0],
-                        to_rgb=False),
-                    dict(type='DefaultFormatBundle'),
-                    dict(
-                        type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
-                ],
-                support=[
-                    dict(type='LoadImageFromFile'),
-                    dict(type='LoadAnnotations', with_bbox=True),
-                    dict(
-                        type='Normalize',
-                        mean=[103.53, 116.28, 123.675],
-                        std=[1.0, 1.0, 1.0],
-                        to_rgb=False),
-                    dict(type='GenerateMask', target_size=(224, 224)),
-                    dict(type='RandomFlip', flip_ratio=0.0),
-                    dict(type='DefaultFormatBundle'),
-                    dict(
-                        type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
-                ]),
-            classes='BASE_CLASSES_SPLIT1',
+            type={{_base_.dataset_type}},
+            ann_cfg={{_base_.train_ann_cfg}},
+            data_root={{_base_.data_root}},
+            img_prefix={{_base_.img_prefix}},
+            multi_pipelines=train_multi_pipelines,
+            classes='BASE_CLASSES',
             use_difficult=True,
             instance_wise=False,
             dataset_name='query_dataset'),
         support_dataset=dict(
-            type='FewShotVOCDataset',
-            ann_cfg=[
-                dict(
-                    type='ann_file',
-                    ann_file=
-                    'data/VOCdevkit/VOC2007/ImageSets/Main/trainval.txt'),
-                dict(
-                    type='ann_file',
-                    ann_file=
-                    'data/VOCdevkit/VOC2012/ImageSets/Main/trainval.txt')
-            ],
-            img_prefix='data/VOCdevkit/',
-            multi_pipelines=dict(
-                query=[
-                    dict(type='LoadImageFromFile'),
-                    dict(type='LoadAnnotations', with_bbox=True),
-                    dict(
-                        type='Resize', img_scale=(1000, 600), keep_ratio=True),
-                    dict(type='RandomFlip', flip_ratio=0.5),
-                    dict(
-                        type='Normalize',
-                        mean=[103.53, 116.28, 123.675],
-                        std=[1.0, 1.0, 1.0],
-                        to_rgb=False),
-                    dict(type='DefaultFormatBundle'),
-                    dict(
-                        type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
-                ],
-                support=[
-                    dict(type='LoadImageFromFile'),
-                    dict(type='LoadAnnotations', with_bbox=True),
-                    dict(
-                        type='Normalize',
-                        mean=[103.53, 116.28, 123.675],
-                        std=[1.0, 1.0, 1.0],
-                        to_rgb=False),
-                    dict(type='GenerateMask', target_size=(224, 224)),
-                    dict(type='RandomFlip', flip_ratio=0.0),
-                    dict(type='DefaultFormatBundle'),
-                    dict(
-                        type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
-                ]),
-            classes='BASE_CLASSES_SPLIT1',
+            type={{_base_.dataset_type}},
+            ann_cfg={{_base_.train_ann_cfg}},
+            data_root={{_base_.data_root}},
+            img_prefix={{_base_.img_prefix}},
+            multi_pipelines=train_multi_pipelines,
+            classes='BASE_CLASSES',
             use_difficult=False,
             instance_wise=False,
             dataset_name='support_dataset')),
     val=dict(
-        type='FewShotVOCDataset',
-        ann_cfg=[
-            dict(
-                type='ann_file',
-                ann_file='data/VOCdevkit/VOC2007/ImageSets/Main/test.txt')
-        ],
-        img_prefix='data/VOCdevkit/',
-        pipeline=[
-            dict(type='LoadImageFromFile'),
-            dict(
-                type='MultiScaleFlipAug',
-                img_scale=(1000, 600),
-                flip=False,
-                transforms=[
-                    dict(type='Resize', keep_ratio=True),
-                    dict(type='RandomFlip'),
-                    dict(
-                        type='Normalize',
-                        mean=[103.53, 116.28, 123.675],
-                        std=[1.0, 1.0, 1.0],
-                        to_rgb=False),
-                    dict(type='ImageToTensor', keys=['img']),
-                    dict(type='Collect', keys=['img'])
-                ])
-        ],
-        classes='BASE_CLASSES_SPLIT1'),
+        type={{_base_.dataset_type}},
+        ann_cfg={{_base_.val_ann_cfg}},
+        data_root={{_base_.data_root}},
+        img_prefix={{_base_.img_prefix}},
+        pipeline=test_pipeline,
+        classes='BASE_CLASSES'),
     test=dict(
-        type='FewShotVOCDataset',
-        ann_cfg=[
-            dict(
-                type='ann_file',
-                ann_file='data/VOCdevkit/VOC2007/ImageSets/Main/test.txt')
-        ],
-        img_prefix='data/VOCdevkit/',
-        pipeline=[
-            dict(type='LoadImageFromFile'),
-            dict(
-                type='MultiScaleFlipAug',
-                img_scale=(1000, 600),
-                flip=False,
-                transforms=[
-                    dict(type='Resize', keep_ratio=True),
-                    dict(type='RandomFlip'),
-                    dict(
-                        type='Normalize',
-                        mean=[103.53, 116.28, 123.675],
-                        std=[1.0, 1.0, 1.0],
-                        to_rgb=False),
-                    dict(type='ImageToTensor', keys=['img']),
-                    dict(type='Collect', keys=['img'])
-                ])
-        ],
+        type={{_base_.dataset_type}},
+        ann_cfg={{_base_.val_ann_cfg}},
+        data_root={{_base_.data_root}},
+        img_prefix={{_base_.img_prefix}},
+        pipeline=test_pipeline,
         test_mode=True,
-        classes='BASE_CLASSES_SPLIT1'),
+        classes='BASE_CLASSES'),
     model_init=dict(
         copy_from_train_dataset=True,
-        samples_per_gpu=16,
-        workers_per_gpu=1,
-        type='FewShotVOCDataset',
+        samples_per_gpu=2,
+        workers_per_gpu=2,
+        type={{_base_.dataset_type}},
         ann_cfg=None,
-        img_prefix='data/VOCdevkit/',
+        data_root={{_base_.data_root}},
+        img_prefix={{_base_.img_prefix}},
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(type='LoadAnnotations', with_bbox=True),
@@ -227,7 +114,7 @@ data = dict(
         ],
         use_difficult=False,
         instance_wise=True,
-        classes='BASE_CLASSES_SPLIT1',
+        classes='BASE_CLASSES',
         dataset_name='model_init_dataset'))
 evaluation = dict(interval=6000, metric='mAP')
 optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=0.0001)

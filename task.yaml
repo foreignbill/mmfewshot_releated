@@ -14,7 +14,7 @@ tasks:
       max_iters:
       seed:
   fine_tuning:
-    entrypoints: "python ./tools/detection/train.py ./configs/fine-tuning_config.py /export/base-training/latest.pth"
+    entrypoints: "python ./tools/detection/train.py ./configs/fine-tuning_config.py"
     args: 
       num_support_ways:
       num_support_shots:

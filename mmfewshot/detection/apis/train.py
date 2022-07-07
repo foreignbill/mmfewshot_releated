@@ -67,6 +67,10 @@ def train_detector(model: nn.Module,
     # is designed to handle dataloader with infinite sampler.
     if cfg.use_infinite_sampler and cfg.runner['type'] == 'EpochBasedRunner':
         cfg.runner['type'] = 'InfiniteEpochBasedRunner'
+    if cfg.runner['type'] == 'IterBasedRunner':
+        cfg.runner['type'] = 'IterBasedRunnerWithLog'
+    if cfg.runner['type'] == 'EpochBasedRunner':
+        cfg.runner['type'] = 'EpochBasedRunnerWithLog'
     runner = build_runner(
         cfg.runner,
         default_args=dict(

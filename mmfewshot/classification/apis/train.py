@@ -71,9 +71,12 @@ def train_model(model: Union[MMDataParallel, MMDistributedDataParallel],
     # be used in `EpochBasedRunner`, because the `EpochBasedRunner` will
     # enumerate the dataloader forever. Thus, `InfiniteEpochBasedRunner`
     # is designed to handle dataloader with infinite sampler.
-    # TODO: here only use InfiniteEpochBasedRunner
     if cfg.use_infinite_sampler and cfg.runner['type'] == 'EpochBasedRunner':
         cfg.runner['type'] = 'InfiniteEpochBasedRunner'
+    if cfg.runner['type'] == 'IterBasedRunner':
+        cfg.runner['type'] = 'IterBasedRunnerWithLog'
+    if cfg.runner['type'] == 'EpochBasedRunner':
+        cfg.runner['type'] = 'EpochBasedRunnerWithLog'
     runner = build_runner(
         cfg.runner,
         default_args=dict(

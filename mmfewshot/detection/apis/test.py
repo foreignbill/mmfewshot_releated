@@ -38,7 +38,7 @@ def single_gpu_test(model: nn.Module,
     model.eval()
     results = []
     dataset = data_loader.dataset
-    prog_bar = mmcv.ProgressBar(len(dataset))
+    # prog_bar = mmcv.ProgressBar(len(dataset))
     for i, data in enumerate(data_loader):
         with torch.no_grad():
             # forward in `test` mode
@@ -83,7 +83,7 @@ def single_gpu_test(model: nn.Module,
 
         results.extend(result)
 
-        prog_bar.update(batch_size)
+        # prog_bar.update(batch_size)
     return results
 
 
@@ -116,8 +116,8 @@ def multi_gpu_test(model: nn.Module,
     results = []
     dataset = data_loader.dataset
     rank, world_size = get_dist_info()
-    if rank == 0:
-        prog_bar = mmcv.ProgressBar(len(dataset))
+    # if rank == 0:
+        # prog_bar = mmcv.ProgressBar(len(dataset))
     time.sleep(2)  # This line can prevent deadlock problem in some cases.
     for i, data in enumerate(data_loader):
         with torch.no_grad():
@@ -127,7 +127,7 @@ def multi_gpu_test(model: nn.Module,
 
         if rank == 0:
             batch_size = len(result)
-            prog_bar.update(batch_size * world_size)
+            # prog_bar.update(batch_size * world_size)
 
     # collect results from all ranks
     if gpu_collect:
@@ -158,13 +158,13 @@ def single_gpu_model_init(model: nn.Module, data_loader: DataLoader) -> List:
     dataset = data_loader.dataset
     logger = get_root_logger()
     logger.info('starting model initialization...')
-    prog_bar = mmcv.ProgressBar(len(dataset))
+    # prog_bar = mmcv.ProgressBar(len(dataset))
     for i, data in enumerate(data_loader):
         with torch.no_grad():
             # forward in `model_init` mode
             result = model(mode='model_init', **data)
         results.append(result)
-        prog_bar.update(num_tasks=len(data['img_metas'].data[0]))
+        # prog_bar.update(num_tasks=len(data['img_metas'].data[0]))
     # `model_init` will process the forward features saved in model.
     if is_module_wrapper(model):
         model.module.model_init()
@@ -201,7 +201,7 @@ def multi_gpu_model_init(model: nn.Module, data_loader: DataLoader) -> List:
     if rank == 0:
         logger = get_root_logger()
         logger.info('starting model initialization...')
-        prog_bar = mmcv.ProgressBar(len(dataset))
+        # prog_bar = mmcv.ProgressBar(len(dataset))
     time.sleep(2)  # This line can prevent deadlock problem in some cases.
     # the model_init dataloader do not use distributed sampler to make sure
     # all of the gpus get the same initialization
@@ -210,8 +210,8 @@ def multi_gpu_model_init(model: nn.Module, data_loader: DataLoader) -> List:
             # forward in `model_init` mode
             result = model(mode='model_init', **data)
         results.append(result)
-        if rank == 0:
-            prog_bar.update(num_tasks=len(data['img_metas'].data[0]))
+        # if rank == 0:
+            # prog_bar.update(num_tasks=len(data['img_metas'].data[0]))
     # model_init function will process the forward features saved in model.
     if is_module_wrapper(model):
         model.module.model_init()

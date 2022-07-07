@@ -8,9 +8,8 @@ train_pipeline = [
     dict(type='LoadAnnotations', with_bbox=True),
     dict(
         type='Resize',
-        img_scale=[(1333, 480), (1333, 512), (1333, 544), (1333, 576),
-                   (1333, 608), (1333, 640), (1333, 672), (1333, 704),
-                   (1333, 736), (1333, 768), (1333, 800)],
+        img_scale=[(1333, 640), (1333, 672), (1333, 704), (1333, 736),
+                   (1333, 768), (1333, 800)],
         keep_ratio=True,
         multiscale_mode='value'),
     dict(type='RandomFlip', flip_ratio=0.5),
@@ -246,7 +245,7 @@ model = dict(
     frozen_parameters=[
         'backbone', 'neck', 'rpn_head', 'roi_head.bbox_head.shared_fcs'
     ])
-checkpoint_config = dict(interval=4000)
+checkpoint_config = dict(interval=80000)
 log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
 custom_hooks = [dict(type='NumClassCheckHook')]
 dist_params = dict(backend='nccl')

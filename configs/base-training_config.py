@@ -4,26 +4,6 @@ _base_ = [
 # part 1
 img_norm_cfg = dict(
     mean=[103.53, 116.28, 123.675], std=[1.0, 1.0, 1.0], to_rgb=False)
-train_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(type='LoadAnnotations', with_bbox=True),
-    dict(
-        type='Resize',
-        img_scale=[(1333, 480), (1333, 512), (1333, 544), (1333, 576),
-                   (1333, 608), (1333, 640), (1333, 672), (1333, 704),
-                   (1333, 736), (1333, 768), (1333, 800)],
-        keep_ratio=True,
-        multiscale_mode='value'),
-    dict(type='RandomFlip', flip_ratio=0.5),
-    dict(
-        type='Normalize',
-        mean=[103.53, 116.28, 123.675],
-        std=[1.0, 1.0, 1.0],
-        to_rgb=False),
-    dict(type='Pad', size_divisor=32),
-    dict(type='DefaultFormatBundle'),
-    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
-]
 test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
@@ -54,7 +34,26 @@ voc_data = dict(
         ann_cfg={{_base_.train_ann_cfg}},
         data_root={{_base_.data_root}},
         img_prefix={{_base_.img_prefix}},
-        pipeline=train_pipeline,
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(
+                type='Resize',
+                img_scale=[(1333, 480), (1333, 512), (1333, 544), (1333, 576),
+                        (1333, 608), (1333, 640), (1333, 672), (1333, 704),
+                        (1333, 736), (1333, 768), (1333, 800)],
+                keep_ratio=True,
+                multiscale_mode='value'),
+            dict(type='RandomFlip', flip_ratio=0.5),
+            dict(
+                type='Normalize',
+                mean=[103.53, 116.28, 123.675],
+                std=[1.0, 1.0, 1.0],
+                to_rgb=False),
+            dict(type='Pad', size_divisor=32),
+            dict(type='DefaultFormatBundle'),
+            dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+        ],
         classes='BASE_CLASSES',
         use_difficult=True,
         instance_wise=False),
@@ -83,7 +82,25 @@ coco_data = dict(
         ann_cfg={{_base_.train_ann_cfg}},
         data_root={{_base_.data_root}},
         img_prefix={{_base_.img_prefix}},
-        pipeline=train_pipeline,
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(
+                type='Resize',
+                img_scale=[(1333, 640), (1333, 672), (1333, 704), (1333, 736),
+                        (1333, 768), (1333, 800)],
+                keep_ratio=True,
+                multiscale_mode='value'),
+            dict(type='RandomFlip', flip_ratio=0.5),
+            dict(
+                type='Normalize',
+                mean=[103.53, 116.28, 123.675],
+                std=[1.0, 1.0, 1.0],
+                to_rgb=False),
+            dict(type='Pad', size_divisor=32),
+            dict(type='DefaultFormatBundle'),
+            dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+        ],
         classes='BASE_CLASSES'),
     val=dict(
         type={{_base_.dataset_type}},

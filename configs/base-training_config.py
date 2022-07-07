@@ -152,8 +152,8 @@ model = dict(
         loss_cls=dict(
             type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
         loss_bbox=dict(type='L1Loss', loss_weight=1.0),
-        num_support_ways=2,
-        num_support_shots=10,
+        num_support_ways={{_base_.num_support_ways}},
+        num_support_shots={{_base_.num_support_shots}},
         roi_extractor=dict(
             type='SingleRoIExtractor',
             roi_layer=dict(type='RoIAlign', output_size=14, sampling_ratio=0),

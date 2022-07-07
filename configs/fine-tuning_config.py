@@ -245,7 +245,7 @@ model = dict(
     frozen_parameters=[
         'backbone', 'neck', 'rpn_head', 'roi_head.bbox_head.shared_fcs'
     ])
-checkpoint_config = dict(interval=80000)
+checkpoint_config = dict(interval=20000)
 log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
 custom_hooks = [dict(type='NumClassCheckHook')]
 dist_params = dict(backend='nccl')

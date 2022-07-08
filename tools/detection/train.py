@@ -67,7 +67,7 @@ def parse_args():
     
     ########################################################################
     #### number of few-shot learning config
-    parser.add_argument('--num_support_ways', type=int, default=2, help='number of support ways')
+    parser.add_argument('--num_support_ways', type=int, default=15, help='number of support ways')
     parser.add_argument('--num_support_shots', type=int, default=10, help='number of support shots')
     parser.add_argument('--num_novel_shots', type=int, default=1, help='number of novel shots')
     #### dataset config
@@ -148,9 +148,11 @@ def main():
     if data_config.dataset_type == 'FewShotCocoDataset':
         predefined_cfg.evaluation = dict(interval=min(20000, predefined_cfg.max_iters), metric='bbox', classwise=True)
         predefined_cfg.fine_tuning_dataset_type = 'FewShotCocoDefaultDataset'
+        predefined_cfg.num_classes = len(data_config.COCO_SPLIT['ALL_CLASSES'])
     elif data_config.dataset_type == 'FewShotVOCDataset':
         predefined_cfg.evaluation = dict(interval=min(6000, predefined_cfg.max_iters), metric='mAP')
         predefined_cfg.fine_tuning_dataset_type = 'FewShotVOCDefaultDataset'
+        predefined_cfg.num_classes = len(data_config.VOC_SPLIT['ALL_CLASSES'])
 
     #### generate new predefined config file
     predefined_generate_path = args.config.replace('config.py', 'predefined_generate.py')

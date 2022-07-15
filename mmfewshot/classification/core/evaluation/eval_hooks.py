@@ -93,6 +93,8 @@ class MetaTestEvalHook(Hook):
         if not self.by_epoch or not self.every_n_epochs(runner, self.interval):
             return
         meta_eval_results = self.evaluate(runner)
+        if meta_eval_results is None:
+            return
         for key in meta_eval_results:
             runner.tensor_writer.add_scalar(key, meta_eval_results[key], global_step=runner.epoch)
             runner.tensor_writer.flush()

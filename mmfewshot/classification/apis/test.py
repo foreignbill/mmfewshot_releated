@@ -5,7 +5,7 @@ from typing import Dict, Optional, Union
 import mmcv
 import numpy as np
 import torch
-from mmcls.apis.test import collect_results_cpu
+from mmcls.apis.test import collect_results_cpu, collect_results_gpu
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import build_optimizer, get_dist_info
 from mmcv.utils import print_log
@@ -221,8 +221,10 @@ def multi_gpu_meta_test(model: MMDistributedDataParallel,
         # if rank == 0:
             # prog_bar.update(world_size)
 
-    collect_results_list = collect_results_cpu(
-        results_list, num_test_tasks, tmpdir=None)
+    # collect_results_list = collect_results_cpu(
+        # results_list, num_test_tasks, tmpdir=None)
+    collect_results_list = collect_results_gpu(
+        results_list, num_test_tasks)
     if rank == 0:
         if show_task_results:
             # the result of each task will be logged into logger

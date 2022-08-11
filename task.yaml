@@ -17,6 +17,7 @@ tasks:
       episodes_seed:
       backbone:
       max_epoch:
+    dist_entrypoints: "python -m torch.distributed.launch --nnodes {0} --node_rank {1} --nproc_per_node 1 --master_addr {2} --master_port {3} ./tools/classification/train.py ./configs/baseline/config.py --launcher pytorch"
   meta:
     entrypoints: "python ./tools/classification/train.py ./configs/meta_baseline/config.py"
     args: 
@@ -29,7 +30,9 @@ tasks:
       episodes_seed:
       backbone:
       max_iters:
+    dist_entrypoints: "python -m torch.distributed.launch --nnodes {0} --node_rank {1} --nproc_per_node 1 --master_addr {2} --master_port {3} ./tools/classification/train.py ./configs/meta_baseline/config.py --launcher pytorch"
   test:
     entrypoints: "python ./tools/classification/test.py ./configs/meta_baseline/config.py /export/meta_baseline/latest.pth"
     args:
       metrics:
+    dist_entrypoints: "python -m torch.distributed.launch --nnodes {0} --node_rank {1} --nproc_per_node 1 --master_addr {2} --master_port {3} ./tools/classification/test.py ./configs/config.py /export/meta_baseline/latest.pth --launcher pytorch"

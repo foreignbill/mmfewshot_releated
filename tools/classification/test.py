@@ -161,8 +161,8 @@ def main():
         wrap_fp16_model(model)
     if rank == 0:
         logger.info(f'load from checkpoint: {args.checkpoint} ')
-    load_checkpoint(model, args.checkpoint, map_location='cpu')
     if not distributed:
+        load_checkpoint(model, args.checkpoint, map_location='cpu')
         if args.device == 'cpu':
             model = model.cpu()
         else:
@@ -178,6 +178,8 @@ def main():
             eval_kwargs=dict(metric=cfg.evaluation.metric),
             show_task_results=args.show_task_results)
     else:
+        if rank == 0:
+            load_checkpoint(model, args.checkpoint, map_location='cpu')
         model = MMDistributedDataParallel(
             model.cuda(),
             device_ids=[torch.cuda.current_device()],

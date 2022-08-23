@@ -194,8 +194,9 @@ def train_detector(model: nn.Module,
             hook = build_from_cfg(hook_cfg, HOOKS)
             runner.register_hook(hook, priority=priority)
 
-    if cfg.resume_from:
-        runner.resume(cfg.resume_from)
-    elif cfg.load_from:
-        runner.load_checkpoint(cfg.load_from)
+    if cfg.rank == 0:
+        if cfg.resume_from:
+            runner.resume(cfg.resume_from)
+        elif cfg.load_from:
+            runner.load_checkpoint(cfg.load_from)
     runner.run(data_loaders, cfg.workflow)

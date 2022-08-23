@@ -7,6 +7,7 @@ image: "mmfewshot:1.7.1-cuda11.0-cudnn8-devel"
 tasks:
   train:
     entrypoints: "python ./tools/detection/train.py ./configs/base-training_config.py"
+    dist_entrypoints: "python -m torch.distributed.launch --nnodes {0} --node_rank {1} --nproc_per_node 1 --master_addr {2} --master_port {3} ./tools/detection/train.py ./configs/base-training_config.py --launcher pytorch"
     args: 
       num_support_ways:
       num_support_shots:
@@ -15,6 +16,7 @@ tasks:
       seed:
   fine_tuning:
     entrypoints: "python ./tools/detection/train.py ./configs/fine-tuning_config.py"
+    dist_entrypoints: "python -m torch.distributed.launch --nnodes {0} --node_rank {1} --nproc_per_node 1 --master_addr {2} --master_port {3} ./tools/detection/train.py ./configs/fine-tuning_config.py --launcher pytorch"
     args:
       num_support_ways:
       num_support_shots:

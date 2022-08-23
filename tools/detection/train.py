@@ -205,6 +205,7 @@ def main():
         rank, world_size = get_dist_info()
         # re-set gpu_ids with distributed training mode
         cfg.gpu_ids = range(world_size)
+    cfg.rank = rank
     # if fine tuning, use different data
     if [key for key in cfg].count('data') == 0:
         if data_config.dataset_type == 'FewShotCocoDataset':
